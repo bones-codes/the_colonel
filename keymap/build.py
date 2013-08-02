@@ -10,9 +10,9 @@ import re
 
 # linux_input = '/usr/src/linux-headers-' + kv + '/include/linux/input.h'
 
-keymap = []
-cap_keymap = []
-shift_keymap = []
+keymap = {}
+cap_keymap = {}
+shift_keymap = {}
 
 special = ['RESERVED', 'ESC', 'BACKSPACE',  'CAPSLOCK', 'F1', 'F2', 'F3', 
 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'NUMLOCK', 'SCROLLLOCK', 'F11',
@@ -80,41 +80,42 @@ shift_sym = {'KPLEFTPAREN': '(', 'KPRIGHTPAREN': ')', 'ENTER': '[ENTER]',
 
 def keyed(pyf, km, sym_list):
 	for s in km:
+		k = str(s)
 		if s == km[len(km)-1]:
-			last = '"[' + s + ']"]'
+			last = k + ':"[' + km[s] + ']"}'
 			pyf.write(last)
 			break
-		elif s in special:
-			btn = '"[' + s + ']",\n'
+		elif km[s] in special:
+			btn = k + ':"[' + km[s] + ']",\n'
 			pyf.write(btn)
-		elif s in sym_list:
-			punc = '"' + sym_list[s] + '",\n'
+		elif km[s] in sym_list:
+			punc = k + ':"' + sym_list[km[s]] + '",\n'
 			pyf.write(punc)
 		else:
-			entry = '"' + s + '", \n'
+			entry = k + ':"' + km[s] + '", \n'
 			pyf.write(entry)
-	return km
+	return
 
 for i in range(183, 442):
 	linput = linecache.getline('linux-input.h', i).split()
 	key = fnmatch.filter(linput, 'KEY*')
 	try:
 		key = re.sub(r'KEY_', "", key[0])
-		keymap.append(key)
-		cap_keymap.append(key)
-		shift_keymap.append(key)
+		keymap[i-183] = key
+		cap_keymap[i-183] = key
+		shift_keymap[i-183] = key
 	except:
 		continue
 
 f = open("keymap.py", "w")
 
-f.write("keys = [\n")  				# Create unmodified keymap.
+f.write("keys = {\n")  				# Create unmodified keymap.
 keyed(f, keymap, sym)
 
-f.write("\n\ncap_keys = [\n") 		# Create capslock keymap.
+f.write("\n\ncap_keys = {\n") 		# Create capslock keymap.
 keyed(f, cap_keymap, cap_sym)
 
-f.write("\n\nshift_keys = [\n")		# Create shift keymap.
+f.write("\n\nshift_keys = \n")		# Create shift keymap.
 keyed(f, shift_keymap, shift_sym)
 
 f.close()
