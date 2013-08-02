@@ -1,5 +1,5 @@
 from keymap import keys, cap_keys, shift_keys
-
+# CHANGE ALL KEYMAP LIST REFERENCES TO DICTIONARY
 shift = False
 evlst = []
 
@@ -20,11 +20,11 @@ for ev in evlog:
 	except:
 		continue
 
-# num = for loop iterator, km = keymap, kl = keylog, key_sym = key symbol
-def counter(num, km, kl, key_sym):
-	if km[kl[num][0]] != key_sym:
+# num = for loop iterator, kl = keylog, key_sym = key symbol
+def counter(num, kl, key_sym):
+	if kl[num][0] != key_sym:
 		return 0
-	return 2 + counter(num-1, km, kl, key_sym)
+	return 2 + counter(num-1, kl, key_sym)
 
 
 def del_count(num, c, kl):
@@ -56,19 +56,16 @@ for n in reversed(xrange(len(evlst))):
 			continue
 		evlst[n] = keys[evlst[n][0]]
 
-	# if keys[evlst[n][0]] == '[ENTER]':
-	# 	evlst[n] = keys[evlst[n][0]] + '\n'
-	# if evlst[n][1] == 1 and keys[evlst[n][0]] == '[SHIFT]':
-	# 	while True:
-	# 		if evlst[n][1] == 0 and keys[evlst[n][0]] != '[SHIFT]':
-	# 			evlst[n] = shift_keys[evlst[n][0]]
+	if evlst[n] == '[ENTER]':
+			evlst[n] = ' [ENTER]\n'
 
 	# delete depressed state
 	# function for backspace
 	# count the number of backspaces and then delete that number of 
 	# indices above
-	# if keys[evlst[n][0]] == '[BACKSPACE]':
-	# 	c = counter(n, keys, evlst, '[BACKSPACE]')
+	# if evlst[n][0] == '[BACKSPACE]':
+	# 	c = counter(n, evlst, '[BACKSPACE]')
+	# 	print c
 	# 	del_count(n, c, evlst)
 
 # print evlst
