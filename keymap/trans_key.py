@@ -1,5 +1,6 @@
 from keymap import keys, cap_keys, shift_keys
-# CHANGE ALL KEYMAP LIST REFERENCES TO DICTIONARY
+
+
 shift = False
 evlst = []
 
@@ -22,19 +23,20 @@ for ev in evlog:
 
 # num = for loop iterator, kl = keylog, key_sym = key symbol
 def counter(num, kl, key_sym):
-	if kl[num][0] != key_sym:
+	if kl[num] != key_sym:
 		return 0
 	return 2 + counter(num-1, kl, key_sym)
 
 
 def del_count(num, c, kl):
 	if c == 0:
-		return
+		return num
 	del kl[num]
 	del_count(num-1, c-1, kl)
 
 
 # YOU ARE TRAVERSING IN REVERSE REVERSE REVERSE!!!!
+# BACKSPACE (Buggy) AND CAPS
 for n in reversed(xrange(len(evlst))):
 	if keys[evlst[n][0]] == '[SHIFT]' and evlst[n][1] == 0:
 		shift = True
@@ -49,24 +51,33 @@ for n in reversed(xrange(len(evlst))):
 		if evlst[n][1] == 0:
 			del evlst[n]
 			continue
-		evlst[n] = shift_keys[evlst[n][0]]
+		elif evlst[n][1] == 2:
+			evlst.insert(n+1, shift_keys[evlst[n][0]])
+			evlst[n] = shift_keys[evlst[n][0]]
+		else:
+			evlst[n] = shift_keys[evlst[n][0]]
 	else:
 		if evlst[n][1] == 0:
 			del evlst[n]
 			continue
-		evlst[n] = keys[evlst[n][0]]
+		elif evlst[n][1] == 2:
+			evlst.insert(n+1, keys[evlst[n][0]])
+			evlst[n] = keys[evlst[n][0]]
+		else:
+			evlst[n] = keys[evlst[n][0]]
 
 	if evlst[n] == '[ENTER]':
-			evlst[n] = ' [ENTER]\n'
+		evlst[n] = ' [ENTER]\n'
 
-	# delete depressed state
-	# function for backspace
-	# count the number of backspaces and then delete that number of 
-	# indices above
-	# if evlst[n][0] == '[BACKSPACE]':
-	# 	c = counter(n, evlst, '[BACKSPACE]')
-	# 	print c
-	# 	del_count(n, c, evlst)
+i = len(evlst)-1
+while i >= 0:
+	print "i", i
+	print "evlst[i]", evlst[i]
+	if evlst[i] == '[BACKSPACE]':
+		c = counter(i, evlst, '[BACKSPACE]')
+		del_count(i, c, evlst)
+		i -= c
+	i -= 1
 
-# print evlst
+print evlst 
 print ''.join(evlst)
