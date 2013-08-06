@@ -5,6 +5,7 @@ import re
 
 keymap = []
 cap_keymap = []
+cap_shift_keymap = []
 shift_keymap = []
 
 special = ['RESERVED', 'ESC', 'BACKSPACE',  'CAPSLOCK', 'F1', 'F2', 'F3', 
@@ -57,6 +58,23 @@ cap_sym = {'KPLEFTPAREN': '(', 'KPRIGHTPAREN': ')', 'ENTER': '[ENTER]',
 'RIGHTMETA': 'COMMAND', 'LEFTSHIFT': '[SHIFT]', 'RIGHTSHIFT': '[SHIFT]', 
 'LEFTALT': '[ALT]'}
 
+cap_shift_sym = {'KPLEFTPAREN': '(', 'KPRIGHTPAREN': ')', 'ENTER': '[ENTER]', 
+'KPENTER': '[ENTER]', 'TAB': ' [TAB]	', 'RIGHTCTRL': '[CTRL]', 
+'LEFTCTRL': '[CTRL]', 'MINUS': '_', 'EQUAL': '+', 'LEFTBRACE': '{', 
+'RIGHTBRACE': '}', 'SEMICOLON': ':', 'APOSTROPHE': '\\\"', 'GRAVE': '~', 
+'RIGHTALT': '[ALT]', 'BACKSLASH': '|', 'COMMA': '<', 'DOT': '>', 
+'SLASH': '?', 'KPASTERISK': '*', 'SPACE': ' ', 'KP7': '7', 'KP8': '8', 
+'KP9': '9', 'KPMINUS': '-', 'KP4': '4', 'KP5': '5', 'KP6': '6', 
+'KPPLUS': '+', 'KP1': '1', 'KP2': '2', 'KP3': '3', 'KP0': '0', 'KPDOT': '.', 
+'KPSLASH': '/', 'KPEQUAL': '=', 'KPPLUSMINUS': '+-', 'KPCOMMA': ',', 
+'LEFTMETA': 'COMMAND', 'RIGHTMETA': 'COMMAND', 'LEFTSHIFT': '[SHIFT]', 
+'RIGHTSHIFT': '[SHIFT]', 'LEFTALT': '[ALT]', '1': '!', '2': '@', '3': '#', 
+'4': '$', '5': '%', '6': '^', '7': '&', '8': '*', '9': '(', '0': ')',
+'Q': 'q', 'W': 'w', 'E': 'e', 'R': 'r', 'T': 't', 'Y': 'y', 'U': 'u', 
+'I': 'i', 'O': 'o', 'P': 'p', 'A': 'a', 'S': 's', 'D': 'd', 'F': 'f', 
+'G': 'g', 'H': 'h', 'J': 'j', 'K': 'k', 'L': 'l', 'Z': 'z', 'X': 'x', 
+'C': 'c', 'V': 'v', 'B': 'b', 'N': 'n', 'M': 'm'}
+
 shift_sym = {'KPLEFTPAREN': '(', 'KPRIGHTPAREN': ')', 'ENTER': '[ENTER]', 
 'KPENTER': '[ENTER]', 'TAB': ' [TAB]	', 'RIGHTCTRL': '[CTRL]', 
 'LEFTCTRL': '[CTRL]', 'MINUS': '_', 'EQUAL': '+', 'LEFTBRACE': '{', 
@@ -95,19 +113,23 @@ for i in range(183, 442):
 		key = re.sub(r'KEY_', "", key[0])
 		keymap.append(key)
 		cap_keymap.append(key)
+		cap_shift_keymap.append(key)
 		shift_keymap.append(key)
 	except:
 		continue
 
 f = open("keymap.py", "w")
 
-f.write("keys = [\n")  				# Create keymap (unmodified).
+f.write("keys = [\n")  					# Create keymap (unmodified).
 keyed(f, keymap, sym)
 
-f.write("\n\ncap_keys = [\n") 		# Create capslock keymap.
+f.write("\n\ncap_keys = [\n") 			# Create capslock keymap.
 keyed(f, cap_keymap, cap_sym)
 
-f.write("\n\nshift_keys = [\n")		# Create shift keymap.
+f.write("\n\ncap_shift_keys = [\n")		# Create cap/shift keymap.
+keyed(f, cap_shift_keymap, cap_shift_sym)
+
+f.write("\n\nshift_keys = [\n")			# Create shift keymap.
 keyed(f, shift_keymap, shift_sym)
 
 f.close()

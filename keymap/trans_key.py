@@ -1,4 +1,4 @@
-from keymap import keys, cap_keys, shift_keys
+from keymap import keys, cap_keys, cap_shift_keys, shift_keys
 
 
 caps = False
@@ -82,9 +82,9 @@ for n in reversed(xrange(1, len(evlst))):
 		continue
 
 	# Determining which keymap to use to translate the log.
-	if shift:
-		which_keymap(n, shift_keys)
-	elif shift and caps:
+	if shift and caps:
+		which_keymap(n, cap_shift_keys)
+	elif shift:
 		which_keymap(n, shift_keys)
 	elif caps:
 		which_keymap(n, cap_keys)
