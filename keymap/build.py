@@ -1,18 +1,11 @@
-# DYNAMICALLY -- TEST ON VULNERABLE!!!!!
-# shift_sym does not have correct APOSTROPHE--->should be "
-# from uname -r get kernel version
-
 import linecache
 import fnmatch
 import re
 
-# kv = ########CURRENT KERNEL VERSION#############
 
-# linux_input = '/usr/src/linux-headers-' + kv + '/include/linux/input.h'
-
-keymap = {}
-cap_keymap = {}
-shift_keymap = {}
+keymap = []
+cap_keymap = []
+shift_keymap = []
 
 special = ['RESERVED', 'ESC', 'BACKSPACE',  'CAPSLOCK', 'F1', 'F2', 'F3', 
 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'NUMLOCK', 'SCROLLLOCK', 'F11',
@@ -67,7 +60,7 @@ cap_sym = {'KPLEFTPAREN': '(', 'KPRIGHTPAREN': ')', 'ENTER': '[ENTER]',
 shift_sym = {'KPLEFTPAREN': '(', 'KPRIGHTPAREN': ')', 'ENTER': '[ENTER]', 
 'KPENTER': '[ENTER]', 'TAB': ' [TAB]	', 'RIGHTCTRL': '[CTRL]', 
 'LEFTCTRL': '[CTRL]', 'MINUS': '_', 'EQUAL': '+', 'LEFTBRACE': '{', 
-'RIGHTBRACE': '}', 'SEMICOLON': ':', 'APOSTROPHE': "'", 'GRAVE': '~', 
+'RIGHTBRACE': '}', 'SEMICOLON': ':', 'APOSTROPHE': '\\\"', 'GRAVE': '~', 
 'RIGHTALT': '[ALT]', 'BACKSLASH': '|', 'COMMA': '<', 'DOT': '>', 
 'SLASH': '?', 'KPASTERISK': '*', 'SPACE': ' ', 'KP7': '7', 'KP8': '8', 
 'KP9': '9', 'KPMINUS': '-', 'KP4': '4', 'KP5': '5', 'KP6': '6', 
@@ -80,42 +73,41 @@ shift_sym = {'KPLEFTPAREN': '(', 'KPRIGHTPAREN': ')', 'ENTER': '[ENTER]',
 
 def keyed(pyf, km, sym_list):
 	for s in km:
-		k = str(s)
 		if s == km[len(km)-1]:
-			last = k + ':"[' + km[s] + ']"}'
+			last = '"[' + s + ']"]'
 			pyf.write(last)
 			break
-		elif km[s] in special:
-			btn = k + ':"[' + km[s] + ']",\n'
+		elif s in special:
+			btn = '"[' + s + ']",\n'
 			pyf.write(btn)
-		elif km[s] in sym_list:
-			punc = k + ':"' + sym_list[km[s]] + '",\n'
+		elif s in sym_list:
+			punc = '"' + sym_list[s] + '",\n'
 			pyf.write(punc)
 		else:
-			entry = k + ':"' + km[s] + '", \n'
+			entry = '"' + s + '", \n'
 			pyf.write(entry)
-	return
+	return km
 
 for i in range(183, 442):
 	linput = linecache.getline('linux-input.h', i).split()
 	key = fnmatch.filter(linput, 'KEY*')
 	try:
 		key = re.sub(r'KEY_', "", key[0])
-		keymap[i-183] = key
-		cap_keymap[i-183] = key
-		shift_keymap[i-183] = key
+		keymap.append(key)
+		cap_keymap.append(key)
+		shift_keymap.append(key)
 	except:
 		continue
 
 f = open("keymap.py", "w")
 
-f.write("keys = {\n")  				# Create unmodified keymap.
+f.write("keys = [\n")  				# Create keymap (unmodified).
 keyed(f, keymap, sym)
 
-f.write("\n\ncap_keys = {\n") 		# Create capslock keymap.
+f.write("\n\ncap_keys = [\n") 		# Create capslock keymap.
 keyed(f, cap_keymap, cap_sym)
 
-f.write("\n\nshift_keys = \n")		# Create shift keymap.
+f.write("\n\nshift_keys = [\n")		# Create shift keymap.
 keyed(f, shift_keymap, shift_sym)
 
 f.close()
