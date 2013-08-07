@@ -3,6 +3,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
+
 int main(void) {
 	int socket_desc;
 	struct sockaddr_in server;
@@ -11,12 +12,12 @@ int main(void) {
 	/* create socket */
 	socket_desc = socket(AF_INET, SOCK_STREAM, 0);
 	if (-1 == socket_desc) {
-		printf("ERROR: Could not create socket");
+		printf("ERROR: Could not create socket\n");
 	}
 
 	server.sin_addr.s_addr = inet_addr("74.125.235.20");
 	server.sin_family = AF_INET;
-	server.sin_port = htons( 80 );
+	server.sin_port = htons(80);
 
 	/* connect to remote server */
 	if (connect(socket_desc,
