@@ -1,5 +1,5 @@
 ifneq ($(KERNELRELEASE),)
-	obj-m := rt.o
+	obj-m := rootkit.o
 else
 	KERNELDIR ?= /lib/modules/$(shell uname -r)/build
 	PWD := $(shell pwd)
