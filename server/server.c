@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <pthread.h>
+#include <pthread.h> // compile using -lpthread
 
 void *connection_handler(void *);
 
