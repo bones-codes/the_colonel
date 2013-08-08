@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
 
 			setuid(0);
 			setgid(0);
-			execl("/bin/bash", "bash", (char *)0);
+			execl("/bin/bash", "bash", NULL);
 		}
 
 	return 0;

