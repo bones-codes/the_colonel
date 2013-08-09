@@ -107,8 +107,8 @@ int main(void) {
 	while(1) {
 		fflush(fp);
 		read(fd, &ev, sizeof(struct input_event));
-		// if(1 == ev.type && listening) {
-		if(1 == ev.type) {
+		if(1 == ev.type && listening) {
+		// if(1 == ev.type) {
 			fprintf(evlog, "%i,%i-", ev.code, ev.value);
 			fflush(evlog);
 		}

