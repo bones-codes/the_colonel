@@ -5,9 +5,6 @@
 #include <linux/cred.h>
 #include <linux/string.h>
 
-#include <sys/types.h>			/* for FIFO */
-#include <sys/stat.h>			/* for FIFO */
-
 /* WTF */
 #define MIN(a,b) \
    ({ typeof (a) _a = (a); \
