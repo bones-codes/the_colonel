@@ -1,5 +1,5 @@
 from sys import argv
-from os import execl
+from os import getpid, execl
 
 def command(c):
 	f = open("/proc/colonel", "w")
