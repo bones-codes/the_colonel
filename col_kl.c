@@ -55,7 +55,7 @@ int main(void) {
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
 
-	dir = mkdir("./col_log", S_IRWXU | S_IRGRP | S_IROTH);						/* log directory */
+	dir = mkdir("./col_log", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);	/* log directory */
 	fp = fopen("./col_log/log.txt", "a+"); 					/* daemon log */
 	evlog = fopen("./col_log/evlog.txt", "a+");  			/* key log */
 	fd = open("/dev/input/event2", O_RDONLY);				/* key event file */
