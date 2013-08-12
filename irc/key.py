@@ -99,4 +99,4 @@ def translate(f):
             i -= c
         i -= 1
 
-    return evlst
+    return "".join(evlst)
