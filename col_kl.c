@@ -1,4 +1,5 @@
 // REMOVE PRINTF WHEN DONE --- DYNAMICALLY FIND EVENT!!!!
+// Maybe use structs input_handle, input_dev, input_handler, or input_dev to determine dev/input/eventX
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/utsname.h>

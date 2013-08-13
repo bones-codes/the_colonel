@@ -1,17 +1,11 @@
 #!/usr/bin/env python
 # HIDE NETSTAT INFO --- READBUFFER NEEDS TO BE BIGGER, OR SEND VIA TCP. MISSING TEXT
-# Example program using irc.bot.
-#
-# Joel Rosdahl <joel@rosdahl.net>
-
-"""A simple example bot.
-
-This is an example bot that uses the SingleServerIRCBot class from
-irc.bot.  The bot enters a channel and listens for commands in
-private messages and channel traffic.  Commands in channel messages
-are given by prefixing the text by the bot name followed by a colon.
-It also responds to DCC CHAT invitations and echos data sent in such
-sessions.
+"""
+This bot uses the SingleServerIRCBot class from irc.bot.  
+The bot enters a channel and listens for commands in private messages and channel traffic.  
+Commands in channel messages are given by prefixing the text 
+by the bot name followed by a colon. It also responds to DCC 
+CHAT invitations and echos data sent in such sessions.
 
 Bot commands are:
 
