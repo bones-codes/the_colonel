@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# DYNAMICALLY FIND linux-input.h ADD CONDITION THAT LOOKS FOR KEYMAP, IF NONE, THEN BUILD
+# ADD CONDITION THAT LOOKS FOR KEYMAP, IF NONE, THEN BUILD
 
 # Builds the lists (maps) required by bot.py for keylog translations.
 # All key names and indexes from linux/input.h.
@@ -120,20 +120,10 @@ def keyed(pyf, km, sym_list):
 			pyf.write(entry)
 	return km
 
-def locate_input():
-	kv = "/usr/src/linux-headers-" + release() + "/include/linux/input.h"
-	linux_input = open(kv, 'r')
-	f = linux_input.read()
-	linux_input.close()
-	# locate linux/input.h in system
-	# if uname.release is in line, open that line safely.
-	return f
-
 # Builds key list from linux/input.h. The KEY_ prefix is stripped. 
 # The index of each key matches its respective keycode.
 for i in range(183, 442):
-	key_input = locate_input()
-	linput = linecache.getline(key_input, i).split()
+	linput = linecache.getline("/usr/src/linux-headers-" + release() + "/include/linux/input.h", i).split()
 	key = fnmatch.filter(linput, 'KEY*')
 	try:
 		key = re.sub(r'KEY_', "", key[0])
