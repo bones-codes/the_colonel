@@ -2,14 +2,11 @@
 from keymap import keys, cap_keys, cap_shift_keys, shift_keys
 
 
-evlst = []
-
-
 # Accepts the loop iterator (num) and the key symbol 
 # to be counted (key_sym). Counts the number of 
 # occurences of the specified key_sym.
-def counter(num, key_sym):
-    if evlst[num] != key_sym:
+def counter(ev, num, key_sym):
+    if ev[num] != key_sym:
         return 0
     return 2 + counter(num-1, key_sym)
 
@@ -17,23 +14,24 @@ def counter(num, key_sym):
 # Accepts the count (c) and loop iterator (num), 
 # then deletes that number of items beginning with
 # the list index determined by the iterator.
-def del_count(num, c):
+def del_count(ev, num, c):
     if 0 == c:
         return num
-    del evlst[num]
+    del ev[num]
     del_count(num-1, c-1)
 
 
-def which_keymap(num, km):
+def which_keymap(ev, num, km):
     # For cases when a letter is depressed.
-    if 2 == evlst[num][1]:
-        evlst.insert(num+1, km[evlst[num][0]])
-        evlst[num] = km[evlst[num][0]]
+    if 2 == ev[num][1]:
+        ev.insert(num+1, km[ev[num][0]])
+        ev[num] = km[ev[num][0]]
     else:
-        evlst[num] = km[evlst[num][0]]
+        ev[num] = km[ev[num][0]]
 
 
 def translate(f):
+    evlst = []
     caps = False
     shift = False
     evlog = f.split('-')
@@ -50,13 +48,12 @@ def translate(f):
             evlst.append(ev)
         except:
             continue
-
+    print "EVLST:", evlst
     # Translates the keylog list (evlst).
     for n in reversed(xrange(1, len(evlst))):
         # Skips translating the date.
         if len(evlst[n]) > 5:
             continue
-
         if '[SHIFT]' == keys[evlst[n][0]] and 0 == evlst[n][1]:
             shift = True
             del evlst[n]
@@ -81,13 +78,13 @@ def translate(f):
 
         # Determines which keymap to use for translation.
         if shift and caps:
-            which_keymap(n, cap_shift_keys)
+            which_keymap(evlst, n, cap_shift_keys)
         elif shift:
-            which_keymap(n, shift_keys)
+            which_keymap(evlst, n, shift_keys)
         elif caps:
-            which_keymap(n, cap_keys)
+            which_keymap(evlst, n, cap_keys)
         else:
-            which_keymap(n, keys)
+            which_keymap(evlst, n, keys)
 
         if '[ENTER]' == evlst[n]:
             evlst[n] = ' [ENTER]\n'
@@ -95,8 +92,8 @@ def translate(f):
     i = len(evlst)-1
     while i >= 0:
         if '[BACKSPACE]' == evlst[i]:
-            c = counter(i, '[BACKSPACE]')
-            del_count(i, c)
+            c = counter(evlst, i, '[BACKSPACE]')
+            del_count(evlst, i, c)
             i -= c
         i -= 1
 
