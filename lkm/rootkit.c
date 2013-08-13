@@ -212,6 +212,7 @@ static int write_colonel(struct file *file, const char __user *buff, unsigned lo
     return count;
 }
 
+
 /* CLEAN/INIT FUNCTIONS */
 /* NULL checks for sanity */ 
 static void clean_procfs(void) {

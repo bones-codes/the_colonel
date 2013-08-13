@@ -33,7 +33,7 @@ def which_keymap(num, km):
         evlst[num] = km[evlst[num][0]]
 
 
-def translate(f, irc=False):
+def translate(f):
     caps = False
     shift = False
     evlog = f.split('-')
@@ -98,8 +98,6 @@ def translate(f, irc=False):
             c = counter(i, '[BACKSPACE]')
             del_count(i, c)
             i -= c
-        if irc and (len(evlst[i]) > 5):
-            del evlst[i]
         i -= 1
 
     return "".join(evlst)
