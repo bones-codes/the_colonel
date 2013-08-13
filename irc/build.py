@@ -9,11 +9,6 @@ import fnmatch
 import re
 
 
-keymap = []
-cap_keymap = []
-cap_shift_keymap = []	# For the instance that both capslock and shift keys are depressed.
-shift_keymap = []
-
 SPECIAL = ['RESERVED', 'ESC', 'BACKSPACE',  'CAPSLOCK', 'F1', 'F2', 'F3', 
 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'NUMLOCK', 'SCROLLLOCK', 'F11',
 'F12', 'SYSRQ', 'LINEFEED', 'UP', 'PAGEUP', 'LEFT', 'RIGHT', 'END', 'DOWN', 
@@ -122,19 +117,27 @@ def keyed(pyf, km, sym_list):
 
 # Builds key list from linux/input.h. The KEY_ prefix is stripped. 
 # The index of each key matches its respective keycode.
-for i in range(183, 442):
-	linput = linecache.getline("/usr/src/linux-headers-" + release() + "/include/linux/input.h", i).split()
-	key = fnmatch.filter(linput, 'KEY*')
-	try:
-		key = re.sub(r'KEY_', "", key[0])
-		keymap.append(key)
-		cap_keymap.append(key)
-		cap_shift_keymap.append(key)
-		shift_keymap.append(key)
-	except:
-		continue
+def key_list(km, ckm, cskm, skm):
+	for i in range(183, 442):
+		linput = linecache.getline("/usr/src/linux-headers-" + release() + "/include/linux/input.h", i).split()
+		key = fnmatch.filter(linput, 'KEY*')
+		try:
+			key = re.sub(r'KEY_', "", key[0])
+			km.append(key)
+			ckm.append(key)
+			cskm.append(key)
+			skm.append(key)
+		except:
+			continue
 
 def main():
+	keymap = []
+	cap_keymap = []
+	cap_shift_keymap = []
+	shift_keymap = []
+
+	key_list(keymap, cap_keymap, cap_shift_keymap, shift_keymap)
+
 	# Creates keymap.py file to write maps to.
 	f = open("keymap.py", "w")
 
