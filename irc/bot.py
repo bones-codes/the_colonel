@@ -33,7 +33,6 @@ from os import getpid
 
 import key
 
-
 server = "chat.freenode.net"
 port = 6667
 channel = "#rwx-hack"
