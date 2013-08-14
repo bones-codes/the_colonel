@@ -251,5 +251,6 @@ def main():
         print "Connecting to %s on port: %d" % (server, port)
     colbot.start()
 
+
 if __name__ == "__main__":
     main()
