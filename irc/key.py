@@ -8,7 +8,7 @@ from keymap import keys, cap_keys, cap_shift_keys, shift_keys
 def counter(ev, num, key_sym):
     if ev[num] != key_sym:
         return 0
-    return 2 + counter(num-1, key_sym)
+    return 2 + counter(ev, num-1, key_sym)
 
 
 # Accepts the count (c) and loop iterator (num), 
@@ -18,7 +18,7 @@ def del_count(ev, num, c):
     if 0 == c:
         return num
     del ev[num]
-    del_count(num-1, c-1)
+    del_count(ev, num-1, c-1)
 
 
 def which_keymap(ev, num, km):
@@ -48,9 +48,9 @@ def translate(f):
             evlst.append(ev)
         except:
             continue
-    print "EVLST:", evlst
+    
     # Translates the keylog list (evlst).
-    for n in reversed(xrange(1, len(evlst))):
+    for n in reversed(xrange(len(evlst))):
         # Skips translating the date.
         if len(evlst[n]) > 5:
             continue
