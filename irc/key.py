@@ -86,8 +86,9 @@ def translate(f):
 			shift = False
 			del evlst[n]
 			continue
-		
-		if 0 == evlst[n][1]:
+	
+		# Only grabs key release.	
+		if 1 != evlst[n][1]:
 		    	del evlst[n]
 		    	continue
 		
@@ -106,3 +107,4 @@ def translate(f):
 	backspace(evlst)
 
     	return "".join(evlst)
+
