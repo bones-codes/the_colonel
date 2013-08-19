@@ -11,4 +11,13 @@ rm col_kl
 # cleanup the rootkit
 echo -n ms >> /proc/colonel
 sudo rmmod rootkit
-make clean
+sudo make clean
+
+# remove logs
+echo "Do you wish to remove the colonel logs?"
+select yn in "Yes" "No"; do
+	case $yn in
+		Yes ) sudo rm -rf /opt/col_log/; break;;
+		No ) exit;;
+	esac
+done
