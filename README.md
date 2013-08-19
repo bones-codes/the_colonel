@@ -9,7 +9,7 @@ Requirements:
 ## Installation
 _Note: channel, server and nickname should be set in irc/bot.py prior to installation._
 
-To install: `sudo ./install`
+To install: `./install`
 
 Uninstalling can be accomplished by running `./uninstall`.
 
@@ -24,9 +24,14 @@ or echo: `echo -n <command> >> /proc/colonel`
 
 From IRC:
 
-Use the help command to see available bot commands: `[nickname]: help`
+If in channel, preface all commands with bot nickname and `:`, i.e. `bot-nickname: <command>`. In private messages or DCC sessions, commands should be passed with out prefix. 
+
+Use `help` to see the  available bot and root commands: `[nickname]: help`
 
 
 ## Resources
-[http://linux.die.net/lkmpg](http://linux.die.net/lkmpg)
-[http://www.tldp.org/LDP/lkmpg/2.6/html/](http://www.tldp.org/LDP/lkmpg/2.6/html/)
+[The Linux Kernel Module Programming Guide](http://www.tldp.org/LDP/lkmpg/2.6/html/)
+
+[Linux Daemon Writing HOWTO](http://www.netzmafia.de/skripten/unix/linux-daemon-howto.html)
+
+[irc 8.5.1](https://pypi.python.org/pypi/irc)
