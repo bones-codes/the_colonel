@@ -165,7 +165,7 @@ STATUS-------------------------------------------\n\
 
 	size = strlen(module_status);
 
-	if (off >= size) {
+	if (off >= size) {											/* ensures the read function isn't continuously called */
 		return 0;
 	}
   
