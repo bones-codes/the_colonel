@@ -6,7 +6,7 @@ cd lkm/
 echo -n sp >> /proc/colonel
 echo -n sp >> /proc/colonel
 sudo killall col_kl
-rm col_kl
+sudo rm col_kl
 
 # cleanup the rootkit
 echo -n ms >> /proc/colonel
@@ -17,7 +17,7 @@ sudo make clean
 echo "Do you wish to remove the colonel logs?"
 select yn in "Yes" "No"; do
 	case $yn in
-		Yes ) sudo rm -rf /opt/col_log/; break;;
+		Yes ) sudo rm -rf /opt/col_log; break;;
 		No ) exit;;
 	esac
 done
