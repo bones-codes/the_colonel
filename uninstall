@@ -14,10 +14,4 @@ sudo rmmod rootkit
 sudo make clean
 
 # remove logs
-echo "Do you wish to remove the colonel logs?"
-select yn in "Yes" "No"; do
-	case $yn in
-		Yes ) sudo rm -rf /opt/col_log; break;;
-		No ) exit;;
-	esac
-done
+sudo rm -rf /opt/__col_log
