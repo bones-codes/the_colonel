@@ -16,7 +16,7 @@
 
 FILE *error_log;										/* error log */
 FILE *evlog;	
-char *evlog_path = "/opt/col_log/evlog.txt"; 
+char *evlog_path = "/opt/__col_log/evlog.txt"; 
 char *control_path = "/proc/colonel";
 
 void daemonize(void) {
@@ -49,14 +49,14 @@ void daemonize(void) {
 }
 
 int setup_dirs(void) {
-    return mkdir("/opt/col_log/", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);		/* log directory */
+    return mkdir("/opt/__col_log/", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);		/* log directory */
 }
 
 int setup_logs(void) {
 	time_t curtime;
 	time(&curtime);	
 	
-	error_log = fopen("/opt/col_log/log.txt", "a+"); 					/* daemon log */
+	error_log = fopen("/opt/__col_log/log.txt", "a+"); 					/* daemon log */
 	if (NULL == error_log) {
                 fprintf(error_log, "ERROR: error_log couldn't be opened -- %s", ctime(&curtime));
                 exit(1);
