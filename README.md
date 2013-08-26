@@ -28,5 +28,8 @@ Use the help command to see available bot commands: `[nickname]: help`
 
 
 ## Resources
-[http://linux.die.net/lkmpg](http://linux.die.net/lkmpg)
-[http://www.tldp.org/LDP/lkmpg/2.6/html/](http://www.tldp.org/LDP/lkmpg/2.6/html/)
+[The Linux Kernel Module Programming Guide](http://www.tldp.org/LDP/lkmpg/2.6/html/)
+
+[Linux Daemon Writing HOWTO](http://www.netzmafia.de/skripten/unix/linux-daemon-howto.html)
+
+[irc 8.5.1](https://pypi.python.org/pypi/irc)
