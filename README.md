@@ -18,7 +18,7 @@ From infected computer:
 
 `cat /proc/colonel` to see available commands. _File will not be visible on content listing of /proc._
 
-To pass commands use the included program: `./rtcmd <command>` 
+To pass commands use the included program: `sudo ./rtcmd <command>` 
 or echo: `echo -n <command> >> /proc/colonel`
 
 
