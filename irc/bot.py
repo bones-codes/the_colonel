@@ -6,8 +6,6 @@ purpose of the bot is to send commands received through DCC sessions
 to the colonel rootkit. Commands in channel messages are given by 
 prefixing the text by the bot nickname followed by a colon. 
 
-Bot commands are:
-
     BOT COMMANDS --------
 	dcc -- Command a bot DCC CHAT invite connection. 
                All root commands must be sent via dcc.

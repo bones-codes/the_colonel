@@ -1,17 +1,15 @@
 ## The Colonel Rootkit
 Colonel is an experimental linux kernel module (rootkit). Remote communication is handled through IRC. The rootkit is able to hide processes, files, grant root privileges and activate key logging.
 
-Requirements:
-
-- Linux 'vanilla' Kernel >= 2.6.29 _– tested up to 3.6_
-
-
 ## Installation
 _Note: channel, server and nickname should be set in irc/bot.py prior to installation._
 
 To install: `./install`
-
 Uninstalling can be accomplished by running `./uninstall`.
+
+Requirements:
+
+- Linux 'vanilla' Kernel >= 2.6.29 _– tested up to 3.6_
 
 ## Usage
 From infected computer:
