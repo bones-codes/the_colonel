@@ -1,5 +1,9 @@
 ## The Colonel Rootkit
-Colonel is an experimental linux kernel module (rootkit). Remote communication is handled through IRC. The rootkit is able to hide processes, files, grant root privileges and activate key logging.
+Colonel is an experimental linux kernel module (rootkit) with an integrated keylogger. Remote communication is handled through the included IRC bot. The rootkit is able to:  
+* activate key logging
+* grant root privileges
+* hide files
+* hide processess
 
 ## Installation
 The Colonel should only be run in a virtual machine. Keylogging is not available on Vagrant.  
