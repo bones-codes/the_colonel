@@ -1,4 +1,7 @@
+altgraph==0.9
 argparse==1.2.1
+bbfreeze==1.1.2
+bbfreeze-loader==1.1.0
 distribute==0.6.24
 irc==8.5.1
 lockfile==0.9.1
