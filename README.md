@@ -7,7 +7,7 @@ Colonel is an experimental linux kernel module (rootkit) with an integrated keyl
 
 ## Installation
 The Colonel should only be run in a virtual machine. Keylogging is not available on Vagrant.  
-_Note: [server](../blob/master/irc/bot.py#L37), [channel](../blob/master/irc/bot.py#L39) and [nickname](../blob/master/irc/bot.py#L40) should be set in irc/bot.py prior to installation._
+_Note: [server](../master/irc/bot.py#L37), [channel](../master/irc/bot.py#L39) and [nickname](../master/irc/bot.py#L40) should be set in irc/bot.py prior to installation._
 
 Install –  `./install`  
 Remove –  `./uninstall`  
