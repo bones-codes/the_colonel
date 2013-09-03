@@ -22,7 +22,7 @@ _Custom /proc file will not be visible on content listing of /proc._
 **From IRC:**
 
 If in channel, preface all commands with bot nickname and `:`, i.e. `bot-nickname: <command>`.  
-In private messages or DCC sessions, commands should be passed with out prefix.  
+In private messages or DCC sessions, commands should be passed without prefix.  
 Use `help` to see the  available bot and root commands: `[nickname]: help`
 
 
