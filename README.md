@@ -16,14 +16,14 @@ Remove –  `./uninstall`
 * Linux 'vanilla' Kernel >= 2.6.29 _– tested up to 3.6_
 
 ## Usage
-**From infected computer:**
+**Local:**
 
 To pass commands use the included program: `sudo ./rtcmd <command>` or echo: `echo -n <command> >> /proc/colonel`  
 To see available commands: `sudo ./rtcmd help` or `cat /proc/colonel`  
 _Custom /proc file will not be visible on content listing of /proc._
 
 
-**From IRC:**
+**Remote:**
 
 If in channel, preface all commands with bot nickname and `:`, i.e. `bot-nickname: <command>`.  
 In private messages or DCC sessions, commands should be passed without prefix.  
