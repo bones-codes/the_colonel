@@ -28,7 +28,7 @@ Python, IRC Library, python-daemon, userland. File path? Reference keymap/build 
 
 <a name="installation"/>
 ## Installation
-The Colonel should only be run in a virtual machine. Keylogging is not available on Vagrant. Both installation and removal are accomplished via shell scripts.  
+Installation and removal are accomplished via shell scripts. The Colonel should only be run in a virtual machine. Keylogging is not available on Vagrant.   
 _Note: [server](../master/irc/col_bot#L36), [channel](../master/irc/col_bot#L38) and [nickname](../master/irc/col_bot#L39) should be set in irc/bot.py prior to installation._
 
 1. Download the [zip file](../archive/master.zip) or `git clone https://github.com/cara-bones/colonel.git`
