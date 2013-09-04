@@ -122,17 +122,15 @@ char *get_event_path(void){
 	time_t curtime;
 	time(&curtime);										/* set the current time */
 
-        /* setup a pipe for reading and execute the command */
+												/* setup a pipe for reading and execute the command */
         event_num = popen("sudo /bin/grep 'sysrq kbd event' /proc/bus/input/devices | sudo /usr/bin/awk -F 'event' '{print $2}'","r");  
         if(!event_num){
                 fprintf(error_log, "%sERROR: Could not open pipe for output (%s)", ctime(&curtime), strerror(errno));
                 exit(1);
         }
 
-        /* grab data from grep/awk execution */
-        fgets(data, sizeof(data), event_num);
-        /* merge path and data in single variable */
-        snprintf(event_path, sizeof(event_path), "%s%s", path, data);
+        fgets(data, sizeof(data), event_num);							/* grab data from grep/awk execution */
+        snprintf(event_path, sizeof(event_path), "%s%s", path, data);				/* merge path and data in single variable */
 
         if (pclose(event_num) != 0){
                 fprintf(error_log,"%sERROR: Failed to close command stream (%s)", ctime(&curtime), strerror(errno));
