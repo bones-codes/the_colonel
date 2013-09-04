@@ -16,9 +16,12 @@ Colonel is an experimental linux kernel module (rootkit) with an integrated keyl
 
 <a name="rootkit"/>
 **Rootkit:**  
-The rootkit is a linux kernel module (lkm) written in C. The lkm, along with any properly prefixed files, is hidden on installation. 
-A custom /proc entry is also created. Communication with the lkm is accomplished by passing commands to the custom /proc entry. 
-The hiding of the custom /proc entry, processes, and files is accomplished by the [modification of page memory attributes](../master/lkm/rootkit.c#L82-L96) and passing in customized functions that target the [/proc](../master/lkm/rootkit.c#L100-L119) and [file system](/master/lkm/rootkit.c#L121-L132) directory listings. 
+The rootkit is a linux kernel module (lkm) written in C. Upon installation, the lkm, along with any properly prefixed files, is hidden. 
+A custom /proc entry is also created and subsequently hidden. Communication with the lkm is accomplished by passing commands to the custom /proc entry.  
+The hiding of the custom /proc entry, processes, and files is accomplished by the [modification of page memory attributes](../master/lkm/rootkit.c#L82-L96) and passing in customized functions that target the [/proc](../master/lkm/rootkit.c#L100-L119) and [file system](/master/lkm/rootkit.c#L121-L132) directory listings. This method of hiding will leave process related commands intact, i.e. `ls`, `ps`, `lsof`, `netstat`, `kill`.  
+The [lkm hides](../master/lkm/rootkit.c#L52-L65) itself by noting its placement within the kobject, and modules listing. EXPAND  
+- command execution
+- references/resources
 
 <a name="keylogger"/>
 **Keylogger:**
