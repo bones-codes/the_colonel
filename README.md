@@ -42,8 +42,8 @@ _Note: [server](../master/irc/col_bot#L36), [channel](../master/irc/col_bot#L38)
 ## Usage
 **Local:**
 
-To pass commands use the included program: `sudo ./rtcmd <command>` or echo: `echo -n <command> >> /proc/colonel`  
-To see available commands: `sudo ./rtcmd help` or `cat /proc/colonel`  
+To pass commands use the included program: `./rtcmd <command>` or echo: `echo -n <command> >> /proc/colonel`  
+To see available commands: `./rtcmd help` or `cat /proc/colonel`  
 _Custom /proc file will not be visible on content listing of /proc._
 
 
