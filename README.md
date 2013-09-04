@@ -1,8 +1,8 @@
 ## The Colonel Rootkit
 [Documentation](#documentation) | [Installation](#installation) | [Usage](#usage) | [Resources](#resources)  
 
-Colonel is an experimental linux kernel module (rootkit) with an integrated keylogger. Remote communication is handled through the included IRC bot. The rootkit is able to:  
-* activate key logging
+Colonel is an experimental linux kernel module (rootkit) with an integrated keylogger. Remote communication is handled through the included IRC bot. The Colonel is able to:  
+* log keyboard input
 * grant root privileges
 * hide files
 * hide processes
@@ -12,11 +12,16 @@ Colonel is an experimental linux kernel module (rootkit) with an integrated keyl
 ## Documentation (draft - editing needed)
 [Rootkit](#rootkit) | [Keylogger](#keylogger) | [IRC Bot](#irc)  
 
-Add showterm and diagram.
+**TODO:** Add showterm and diagram.
 
 <a name="rootkit"/>
-**Rootkit:**
-C, LKM, kernel mode. Installed via social engineering. Modifies the page memory attributes and passes in modified fs and proc functions. Creates custom kernel entry - receives commands from custom entry.
+**Rootkit:**  
+The rootkit is a linux kernel module (lkm) written in C. The lkm, along with any properly prefixed files, is hidden on installation. A custom /proc entry is also created. Communication with the lkm is accomplished by passing commands to the custom /proc entry. The hiding of the custom /proc entry, processes, and files is accomplished by the [modification of page memory attributes](../master/lkm/rootkit.c#L82-L96) and passing in customized functions. The passed functions target the [/proc](../master/lkm/rootkit.c#L100-L119) and [file system](/master/lkm/rootkit.c#L121-L132) directory listings. 
+- module hide
+- hide process proc entry
+- hide file
+- custom proc entry
+- commands
 
 <a name="keylogger"/>
 **Keylogger:**
