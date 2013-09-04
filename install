@@ -9,4 +9,4 @@ sudo ./col_kl
 
 # run the IRC bot
 cd ../irc
-sudo python bot.py
+sudo ./col_bot

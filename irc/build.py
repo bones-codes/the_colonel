@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# ADD CONDITION THAT LOOKS FOR KEYMAP, IF NONE, THEN BUILD
 
 # Builds the lists (maps) required by bot.py for keylog translations.
 # All key names and indexes from linux/input.h.
