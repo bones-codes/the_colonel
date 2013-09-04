@@ -16,12 +16,9 @@ Colonel is an experimental linux kernel module (rootkit) with an integrated keyl
 
 <a name="rootkit"/>
 **Rootkit:**  
-The rootkit is a linux kernel module (lkm) written in C. The lkm, along with any properly prefixed files, is hidden on installation. A custom /proc entry is also created. Communication with the lkm is accomplished by passing commands to the custom /proc entry. The hiding of the custom /proc entry, processes, and files is accomplished by the [modification of page memory attributes](../master/lkm/rootkit.c#L82-L96) and passing in customized functions. The passed functions target the [/proc](../master/lkm/rootkit.c#L100-L119) and [file system](/master/lkm/rootkit.c#L121-L132) directory listings. 
-- module hide
-- hide process proc entry
-- hide file
-- custom proc entry
-- commands
+The rootkit is a linux kernel module (lkm) written in C. The lkm, along with any properly prefixed files, is hidden on installation. 
+A custom /proc entry is also created. Communication with the lkm is accomplished by passing commands to the custom /proc entry. 
+The hiding of the custom /proc entry, processes, and files is accomplished by the [modification of page memory attributes](../master/lkm/rootkit.c#L82-L96) and passing in customized functions that target the [/proc](../master/lkm/rootkit.c#L100-L119) and [file system](/master/lkm/rootkit.c#L121-L132) directory listings. 
 
 <a name="keylogger"/>
 **Keylogger:**
