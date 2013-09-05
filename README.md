@@ -29,13 +29,17 @@ The custom /proc entry displays accepted rootkit commands, methods of passing co
 
 <a name="keylogger"/>
 **Keylogger:**  
-The keylogger is a daemonized C program. Activation/deactivation is accomplished by passing the appropriate command to the rootkit's custom /proc entry. Keyboard entries (keycodes of released keys) are captured from the /dev/input/event file and written to /opt/__col_log/evlog.txt. The keylogger also logs its activity, as well as any errors, to /opt/__col_log/log.txt. Both [directory](../master/lkm/col_kl.c#L50-L52) and [PID](../master/lkm/col_kl.c#L71-L88) are automatically hidden upon installation.
+The keylogger is a daemonized C program. Activation/deactivation is accomplished by passing the appropriate command to the rootkit's custom /proc entry. Keyboard entries (keycodes of released keys) are captured from the /dev/input/event file and written to /opt/__col_log/evlog.txt (keylog). The keylogger also logs its activity, as well as any errors, to /opt/__col_log/log.txt.
 
-_Keylog translation is done by the translate function in [irc/key.py](../master/irc/key.py#L57-L109) through the IRC bot or rtcmd._
+_Both [directory](../master/lkm/col_kl.c#L50-L52) and keylogger [PID](../master/lkm/col_kl.c#L71-L88) are automatically hidden upon installation._
 
 <a name="irc"/>
-**IRC Bot:**
-Python, IRC Library, python-daemon, userland. File path? Reference keymap/build and keylog translation module. Listens for commands in channel traffic, private messages and DCC sessions. Writes commands to /proc/colonel.
+**IRC Bot:**  
+The IRC bot is a daemon based on the python IRC framework. Commands can be passed through channel traffic, private messages, and DCC sessions. Bot PID is automatically hidden upon installation.  
+
+Commands that are not bot-specific are written to the custom rootkit /proc entry. Translation of the keylog is handled through the translate function in [irc/key.py](../master/irc/key.py#L57-L109).
+
+_IRC bot PID is hidden on installation._
 
 <a name="installation"/>
 ## Installation
