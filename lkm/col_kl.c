@@ -107,8 +107,8 @@ int system_timestamp(void) {
 		fprintf(error_log, "%sERROR: Could not open '%s' (%s)", ctime(&curtime), evlog_path, strerror(errno));
 		exit(1);
 	}	
-	fprintf(evlog, "%s%s | %s | %s\n\n-", ctime(&curtime), unameData.sysname, unameData.release, unameData.machine);
-	fprintf(evlog, "\n\n%s", ctime(&curtime));		       				/* timestamp */
+	//fprintf(evlog, "%s%s | %s | %s\n\n-", ctime(&curtime), unameData.sysname, unameData.release, unameData.machine);
+	fprintf(evlog, "\n\n%s-", ctime(&curtime));		       				/* timestamp */
 	fclose(evlog);
 	fprintf(error_log, "Begin listening -- %s", ctime(&curtime));
 	return 0;
