@@ -1,7 +1,7 @@
 ## The Colonel Rootkit
 [Documentation](#documentation) | [Installation](#installation) | [Usage](#usage) | [Resources](#resources)  
 
-Colonel is an experimental linux kernel module (rootkit) with an integrated keylogger. Remote communication is handled through the included IRC bot. The Colonel is able to:  
+Colonel is an experimental linux kernel module (rootkit) and keylogger. Remote communication is handled through the included IRC bot. The Colonel is able to:  
 * log keyboard input
 * grant root privileges
 * hide files
@@ -14,18 +14,22 @@ Colonel is an experimental linux kernel module (rootkit) with an integrated keyl
 
 **TODO:** Add showterm and diagram.
 
+The following is an overview of the three main components of the Colonel.
+
 <a name="rootkit"/>
 **Rootkit:**  
 The rootkit is a linux kernel module (lkm) written in C. Upon installation, the lkm, along with any properly prefixed files, is hidden. 
 A custom /proc entry is also created and subsequently hidden. Communication with the lkm is accomplished by passing commands to the custom /proc entry.  
-The hiding of the custom /proc entry, processes, and files is accomplished by the [modification of page memory attributes](../master/lkm/rootkit.c#L82-L96) and passing in customized functions that target the [/proc](../master/lkm/rootkit.c#L100-L119) and [file system](/master/lkm/rootkit.c#L121-L132) directory listings. This method of hiding will leave process related commands intact, i.e. `ls`, `ps`, `lsof`, `netstat`, `kill`.  
-The [lkm hides](../master/lkm/rootkit.c#L52-L65) itself by noting its placement within the kobject, and modules listing. EXPAND  
-- command execution
-- references/resources
+
+The [lkm hides](../master/lkm/rootkit.c#L52-L65) itself by noting its placement within the kobject, and modules listing. The hiding of the custom /proc entry, processes, and files is accomplished by the [modification of page memory attributes](../master/lkm/rootkit.c#L82-L96) and passing in customized functions that target the [/proc](../master/lkm/rootkit.c#L100-L119) and [file system](/master/lkm/rootkit.c#L121-L132) directory listings. This method of hiding leaves process related commands intact, i.e. `ls`, `ps`, `lsof`, `netstat`, `kill`.  
+
+The custom /proc entry displays accepted rootkit commands, methods of passing commands, and the current rootkit status. This is accomplished by modifying the /proc entry's [proc_read function](../master/lkm/rootkit.c#L134-L179). All passed commands are processed through the /proc entry's modified [proc_write function](../master/lkm/rootkit.c#L181-L213).  
+
+**TODO:** Add references/resources
 
 <a name="keylogger"/>
-**Keylogger:**
-C, daemon, userland. Logs keycodes and values of released keys to log in hidden directory. Includes error log. File path. Receives commands via /proc/colonel. 
+**Keylogger:**  
+The keylogger is a daemonized C program. Activation/deactivation is accomplished by passing the appropriate command to the rootkit's custom /proc entry. Keyboard entries are captured from the /dev/input/event file and written to /opt/__col_log/evlog.txt. The keylogger also logs its activity, as well as any errors, to /opt/__col_log/log.txt. in a customLogs keycodes and values of released keys to log in hidden directory. Includes error log
 
 <a name="irc"/>
 **IRC Bot:**
@@ -34,9 +38,9 @@ Python, IRC Library, python-daemon, userland. File path? Reference keymap/build 
 <a name="installation"/>
 ## Installation
 Installation and removal are accomplished via shell scripts. The Colonel should only be run in a virtual machine. Keylogging is not available on Vagrant.   
-_Note: [server](../master/irc/col_bot#L36), [channel](../master/irc/col_bot#L38) and [nickname](../master/irc/col_bot#L39) should be set in irc/bot.py prior to installation._
+_Note: server, channel and nickname should be set in [irc/col_bot](../master/irc/col_bot#L36-L39) prior to installation._
 
-1. Download the [zip file](../archive/master.zip) or `git clone https://github.com/cara-bones/colonel.git`
+1. `git clone https://github.com/cara-bones/colonel.git`
 2. From /colonel run the `./install` command.  
 3. To remove, run `./uninstall` from /colonel.
 
