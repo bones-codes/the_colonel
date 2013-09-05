@@ -37,9 +37,9 @@ _Both [directory](../master/lkm/col_kl.c#L50-L52) and keylogger [PID](../master/
 **IRC Bot:**  
 The IRC bot is a daemon based on the python IRC framework. Commands can be passed through channel traffic, private messages, and DCC sessions. Bot PID is automatically hidden upon installation.  
 
-Commands that are not bot-specific are written to the custom rootkit /proc entry. Translation of the keylog is handled through the translate function in [irc/key.py](../master/irc/key.py#L57-L109).
+Commands that are not bot-specific are written to the custom rootkit /proc entry. [Keylog translation](,,/master/irc/col_bot#L109-L116) is handled through the translate function in [irc/key.py](../master/irc/key.py#L57-L109).
 
-_IRC bot PID is hidden on installation._
+_IRC bot [PID](../master/irc/col_bot#L256-L262) is hidden on installation._
 
 <a name="installation"/>
 ## Installation
