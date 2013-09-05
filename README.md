@@ -29,7 +29,9 @@ The custom /proc entry displays accepted rootkit commands, methods of passing co
 
 <a name="keylogger"/>
 **Keylogger:**  
-The keylogger is a daemonized C program. Activation/deactivation is accomplished by passing the appropriate command to the rootkit's custom /proc entry. Keyboard entries are captured from the /dev/input/event file and written to /opt/__col_log/evlog.txt. The keylogger also logs its activity, as well as any errors, to /opt/__col_log/log.txt. in a customLogs keycodes and values of released keys to log in hidden directory. Includes error log
+The keylogger is a daemonized C program. Activation/deactivation is accomplished by passing the appropriate command to the rootkit's custom /proc entry. Keyboard entries (keycodes of released keys) are captured from the /dev/input/event file and written to /opt/__col_log/evlog.txt. The keylogger also logs its activity, as well as any errors, to /opt/__col_log/log.txt. Both [directory](../master/lkm/col_kl.c#L50-L52) and [PID](../master/lkm/col_kl.c#L71-L88) are automatically hidden upon installation.
+
+_Keylog translation is done by the translate function in [irc/key.py](../master/irc/key.py#L57-L109) through the IRC bot or rtcmd._
 
 <a name="irc"/>
 **IRC Bot:**
