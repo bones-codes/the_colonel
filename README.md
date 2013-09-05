@@ -1,5 +1,5 @@
 ## The Colonel Rootkit
-[Documentation](#documentation) | [Installation](#installation) | [Usage](#usage) | [Resources](#resources)  
+[Demo](showterm.io/13720f013d95a0ceeb05f#fast) | [Documentation](#documentation) | [Installation](#installation) | [Usage](#usage) | [Resources](#resources)  
 
 Colonel is an experimental linux kernel module (rootkit) and keylogger. Remote communication is handled through the included IRC bot. The Colonel is able to:  
 * log keyboard input
@@ -12,7 +12,7 @@ Colonel is an experimental linux kernel module (rootkit) and keylogger. Remote c
 ## Documentation (draft - editing needed)
 [Rootkit](#rootkit) | [Keylogger](#keylogger) | [IRC Bot](#irc)  
 
-**TODO:** Add showterm and diagram.
+**TODO:** Add diagram.
 
 The following is an overview of the three main components of the Colonel.
 
