@@ -25,8 +25,8 @@ The [rootkit hides](../master/lkm/rootkit.c#L52-L65) itself by deleting its plac
 
 During [rootkit removal](/master/lkm/rootkit.c#L292-L295), all modified functions are restored, the custom /proc entry is deleted, and any hidden PIDs and files are revealed.
 
-In researching the build, I focused my efforts on the [linux kernel](), [module programming](http://www.tldp.org/LDP/lkmpg/2.6/html/), and other linux rootkits.
-_For more information on rootkits, see the [Wikipedia entry](https://en.wikipedia.org/wiki/Rootkit).
+_In researching the build, I focused my efforts on [module programming](http://www.tldp.org/LDP/lkmpg/2.6/html/), and other linux rootkits – specifically Ormi's tutorial on [Writing a Simple Linux Rootkit](http://w3.cs.jmu.edu/kirkpams/550-f12/papers/linux_rootkit.pdf). Ormi's rootkit proved to be incompatible with the XX kernel. Since this is the kernel that is emplyed by the Parallel's version of Ubuntu (the virtual machine I employed in the build), I had to take a different direction. This rootkit is a modified implementation of Ivyl's [Simple Linux Rootkit](http://ivyl.0xcafe.eu/2012/10/27/simple-linux-rootkit/). Since my modifications are fairly lightweight, and the implementation fairly straightforward, most of my personal involvement was in commenting to ensure that I understood what was occurring._
+_For more information on rootkits, see the [Wikipedia entry](https://en.wikipedia.org/wiki/Rootkit)._
 **TODO:** Add references/resources
 
 <a name="keylogger"/>
