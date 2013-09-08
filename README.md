@@ -23,7 +23,7 @@ A custom /proc entry is also created and subsequently hidden. Communication with
 
 The [rootkit hides](../master/lkm/rootkit.c#L52-L65) itself by deleting its placement within the kobject, and modules listing. Prior to deletion, the rootkit stores its placement. This enables the rootkit to 'show' itself on command by reinserting its entry into the listings. The hiding of the custom /proc entry, processes, and files is accomplished by the [modification of page memory attributes](../master/lkm/rootkit.c#L82-L96) and passing in customized functions that target the [/proc](../master/lkm/rootkit.c#L100-L119) and [file system](/master/lkm/rootkit.c#L121-L132) directory listings. The process ids (PIDs) are stored within an array that is referenced by new_proc_readdir whenever a process related command is sent. If the PID is found within the array, it is not returned. This method of hiding leaves process related commands intact, i.e. `ls`, `ps`, `lsof`, `netstat`, `kill`. Both the custom /proc entry and files are hidden by name and prefix.  
 
-During [rootkit removal](/master/lkm/rootkit.c#L292-L295), all modified functions are restored, custom /proc entry is deleted, and any hidden PIDs and files are revealed.
+During [rootkit removal](/master/lkm/rootkit.c#L292-L295), all modified functions are restored, the custom /proc entry is deleted, and any hidden PIDs and files are revealed.
 
 **TODO:** Add references/resources
 
