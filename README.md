@@ -25,6 +25,8 @@ The [rootkit hides](../master/lkm/rootkit.c#L52-L65) itself by deleting its plac
 
 During [rootkit removal](/master/lkm/rootkit.c#L292-L295), all modified functions are restored, the custom /proc entry is deleted, and any hidden PIDs and files are revealed.
 
+In researching the build, I focused my efforts on the [linux kernel](), [module programming](http://www.tldp.org/LDP/lkmpg/2.6/html/), and other linux rootkits.
+_For more information on rootkits, see the [Wikipedia entry](https://en.wikipedia.org/wiki/Rootkit).
 **TODO:** Add references/resources
 
 <a name="keylogger"/>
@@ -52,6 +54,7 @@ _Note: server, channel and nickname should be set in [irc/col_bot](../master/irc
 
 **Requirements:**
 * Linux 'vanilla' Kernel >= 2.6.29 _– tested up to 3.6_
+* 2.6.29 _– untested n x86_
 
 <a name="usage"/>
 ## Usage
