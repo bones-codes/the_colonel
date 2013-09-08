@@ -33,11 +33,10 @@ _In researching the rootkit build, I focused my efforts on [module programming](
 **Keylogger:**  
 The keylogger is a C daemon. 
 
-The Colonel's keylogger, once activated, records keyboard input to a log in a hidden directory in /opt. The input is captured from the keyboard's /dev/input/event file. The keylogger also records its activity, and any errors, to a log within the same hidden directory. 
+Once installed, the keylogger hides it's PID, creates the required directory and logs, and begins listening to the custom /proc entry that was created by the rootkit. When the appropriate command is passed to the custom /proc entry, keylogging is activated. Keycodes and their values are captured from the keyboard /dev/input/event file and written to /opt/__col_log/evlog.txt (keylog). The keylogger also logs its activity, as well as any errors, to /opt/__col_log/log.txt.
+Since the created directory is prefixed appropriately, it is hidden by the rootkit.
 
-Once installed, the keylogger hides it's PID, creates the required directory and logs, and begins listening to the custom /proc entry that was created by the rootkit. When the appropriate command is passed to the custom /proc entry, keylogging is activated. Keycodes and their values are captured from the /dev/input/event file and written to /opt/__col_log/evlog.txt (keylog). The keylogger also logs its activity, as well as any errors, to /opt/__col_log/log.txt.
-
-_Both [directory](../master/lkm/col_kl.c#L50-L52) and keylogger [PID](../master/lkm/col_kl.c#L71-L88) are automatically hidden upon installation._
+* Resources
 
 <a name="irc"/>
 **IRC Bot:**  
