@@ -17,8 +17,7 @@
       <header>
         <h1>The Colonel</h1>
         <p></p>
-
-        <p class="view"><a href="https://github.com/cara-bones/colonel">View the Project on GitHub <small>cara-bones/colonel</small></a></p>
+        <p class="view"><a href="#documentation">Documentation</a> <small>•</small> <a href="#installation">Installation</a> <small>•</small> <a href="#usage">Usage</a><br><span style="display: block; margin-top: -6px;"><small>|</small> <a href="https://github.com/cara-bones/colonel"><small>cara-bones/colonel</small></a> <small>|</small> <a href="http://showterm.io/13720f013d95a0ceeb05f#fast"><small>demo</small></a> <small>|</small> <a href="#resources"><small>resources</small></a> <small>|</small></span>   </p>
 
 
         <ul>
@@ -31,7 +30,7 @@
         <hr><h2>
 <a name="overview" class="anchor" href="#overview"><span class="octicon octicon-link"></span></a>Overview</h2>
 
-<p><a href="showterm.io/13720f013d95a0ceeb05f#fast">Demo</a> | <a href="#documentation">Documentation</a> | <a href="#installation">Installation</a> | <a href="#usage">Usage</a> | <a href="#resources">Resources</a>  </p>
+<p><a href="http://showterm.io/13720f013d95a0ceeb05f#fast">Demo</a> | <a href="#documentation">Documentation</a> | <a href="#installation">Installation</a> | <a href="#usage">Usage</a>  </p>
 
 <p>Colonel is an experimental linux kernel module (rootkit) and keylogger. Remote communication is handled through the included IRC bot. The Colonel is able to:  </p>
 
@@ -41,7 +40,6 @@
 <li>hide files</li>
 <li>hide processes</li>
 </ul>
-<iframe src="http://showterm.io/13720f013d95a0ceeb05f#fast" width="640" height="480"></iframe>
 
 <hr><p><a name="documentation"></a></p>
 
@@ -83,8 +81,8 @@ A custom /proc entry is also created and subsequently hidden. Communication with
 
 <p>The keylogger is a user space C daemon. </p>
 
-<p>Once installed, the keylogger creates the required directory and logs, <a href="../master/lkm/col_kl.c#L117-L140">dynamically finds the keyboard /dev/input/event file</a> †, and begins listening to the custom /proc entry that was created by the rootkit. When the appropriate command is passed to the custom /proc entry, keylogging is activated. Keycodes and their values are captured from the keyboard /dev/input/event file and written to /opt/__col_log/evlog.txt (keylog). The keylogger also logs its activity, as well as any errors, to /opt/__col_log/log.txt.
-Since the created directory is prefixed appropriately, it is hidden by the rootkit. The rootkit also automatically hides the keylogger PID.</p>
+<p>Once installed, the keylogger creates the required directory and logs, <a href="../master/lkm/col_kl.c#L117-L140">dynamically finds the keyboard /dev/input/event file</a> †, and begins listening to the custom /proc entry that was created by the rootkit. When the appropriate command is passed to the custom /proc entry, keylogging is activated.  
+<br><br>Since the created directory is prefixed appropriately, it is hidden by the rootkit. Keycodes and their values are captured from the keyboard /dev/input/event file and written to /opt/__col_log/evlog.txt (keylog). The keylogger also logs its activity, as well as any errors, to /opt/__col_log/log.txt. The rootkit also automatically hides the keylogger PID.</p>
 
 <p>Keylog translation is currently handled by the Python <a href="../master/irc/key.py">translation module</a> accessed remotely via the IRC bot or locally through the rtcmd command-line program. The translation is done using custom keymaps built using the linux/input.h file.</p>
 
@@ -118,7 +116,7 @@ Since the created directory is prefixed appropriately, it is hidden by the rootk
 <h2>
 <a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
 
-<p>Installation and removal are accomplished via shell scripts. The Colonel should only be run in a virtual machine. Keylogging is not available on Vagrant.<br><em>Note: server, channel and nickname should be set in <a href="../master/irc/col_bot#L36-L39">irc/col_bot</a> prior to installation.</em></p>
+<p>Installation and removal are accomplished via shell scripts. The Colonel should only be run in a virtual machine.<br><em><br>Note – server, channel and nickname should be set in <a href="../master/irc/col_bot#L36-L39">irc/col_bot</a> prior to installation. Keylogging is not available on Vagrant.</em></p>
 
 <ol>
 <li><code>git clone https://github.com/cara-bones/colonel.git</code></li>
@@ -138,17 +136,17 @@ Since the created directory is prefixed appropriately, it is hidden by the rootk
 <h2>
 <a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
 
-<p><strong>Local:</strong></p>
+<h4>Local</h4>
 
 <p>To pass commands use the included program: <code>./rtcmd &lt;command&gt;</code> or echo: <code>echo -n &lt;command&gt; &gt;&gt; /proc/colonel</code><br>
-To see available commands: <code>./rtcmd help</code> or <code>cat /proc/colonel</code>  </p>
+<br>To see available commands: <code>./rtcmd help</code> or <code>cat /proc/colonel</code>
+<br>
+<em>Note – Custom /proc file will not be visible on content listing of /proc.</em></p>
 
-<p><em>Note: Custom /proc file will not be visible on content listing of /proc.</em></p>
-
-<p><strong>Remote:</strong></p>
+<h4>Remote</h4>
 
 <p>If in channel, preface all commands with bot nickname and <code>:</code>, i.e. <code>bot-nickname: &lt;command&gt;</code>.<br>
-In private messages or DCC sessions, commands should be passed without prefix.<br>
+<br>In private messages or DCC sessions, commands should be passed without prefix.<br>
 Use <code>help</code> to see the  available bot and root commands: <code>bot-nickname: help</code></p>
 
 <hr><p><a name="resources"></a></p>
