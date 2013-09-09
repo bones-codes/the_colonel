@@ -83,7 +83,7 @@ _Note: server, channel and nickname should be set in [irc/col_bot](../master/irc
 
 <a name="usage"/>
 ## Usage
-**Local:**
+#### Local
 
 To pass commands use the included program: `./rtcmd <command>` or echo: `echo -n <command> >> /proc/colonel`  
 To see available commands: `./rtcmd help` or `cat /proc/colonel`  
@@ -91,7 +91,7 @@ To see available commands: `./rtcmd help` or `cat /proc/colonel`
 _Note: Custom /proc file will not be visible on content listing of /proc._
 
 
-**Remote:**
+#### Remote
 
 If in channel, preface all commands with bot nickname and `:`, i.e. `bot-nickname: <command>`.  
 In private messages or DCC sessions, commands should be passed without prefix.  
