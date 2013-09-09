@@ -39,8 +39,9 @@ Uninstalling the Colonel restores all modified functions, deletes the custom /pr
 #### Keylogger
 The keylogger is a user space C daemon. 
 
-Once installed, the keylogger creates the required directory and logs, [dynamically finds the keyboard /dev/input/event file](../master/lkm/col_kl.c#L117-L140) †, and begins listening to the custom /proc entry that was created by the rootkit. When the appropriate command is passed to the custom /proc entry, keylogging is activated. Keycodes and their values are captured from the keyboard /dev/input/event file and written to /opt/__col_log/evlog.txt (keylog). The keylogger also logs its activity, as well as any errors, to /opt/__col_log/log.txt.
-Since the created directory is prefixed appropriately, it is hidden by the rootkit. The rootkit also automatically hides the keylogger PID.
+Once installed, the keylogger creates the required directory and logs, [dynamically finds the keyboard /dev/input/event file](../master/lkm/col_kl.c#L117-L140) †, and begins listening to the custom /proc entry that was created by the rootkit. When the appropriate command is passed to the custom /proc entry, keylogging is activated.  
+
+Since the created directory is prefixed appropriately, it is hidden by the rootkit. Keycodes and their values are captured from the keyboard /dev/input/event file and written to /opt/__col_log/evlog.txt (keylog). The keylogger also logs its activity, as well as any errors, to /opt/__col_log/log.txt. The rootkit also automatically hides the keylogger PID.
 
 Keylog translation is currently handled by the Python [translation module](../master/irc/key.py) accessed remotely via the IRC bot or locally through the rtcmd command-line program. The translation is done using custom keymaps built using the linux/input.h file.
 
