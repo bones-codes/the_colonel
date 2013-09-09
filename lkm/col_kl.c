@@ -113,7 +113,7 @@ int system_timestamp(void) {
 	fprintf(error_log, "Begin listening -- %s", ctime(&curtime));
 	return 0;
 }
-
+// dynamically finds event path. This has only been tested on my setup. More thorough testing is needed...
 char *get_event_path(void){
         FILE *event_num;
         char data[2] = {'\0'};
