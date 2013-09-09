@@ -12,9 +12,9 @@ Colonel is an experimental linux kernel module (rootkit) and keylogger. Remote c
 ## Documentation (draft - editing needed)
 [Rootkit](#rootkit) | [Keylogger](#keylogger) | [IRC Bot](#irc)  
 
-**TODO:** Add diagram.
-
 The following is an overview of the three main components of the Colonel.
+
+**TODO:** Add diagram.
 
 <a name="rootkit"/>
 **Rootkit:**  
@@ -31,6 +31,7 @@ Uninstalling the Colonel restores all modified functions, deletes the custom /pr
 
 _In researching the rootkit build, I focused my efforts on [module programming](http://www.tldp.org/LDP/lkmpg/2.6/html/), and other linux rootkits – specifically Ormi's tutorial on [Writing a Simple Linux Rootkit](http://w3.cs.jmu.edu/kirkpams/550-f12/papers/linux_rootkit.pdf). Since my modifications are fairly lightweight, and the implementation fairly straightforward, most of my personal involvement was in commenting to ensure that I understood what was occurring._
 
+
 <a name="keylogger"/>
 **Keylogger:**  
 The keylogger is a user space C daemon. 
@@ -44,6 +45,7 @@ On removal of the Colonel, the custom logs and directory are deleted.
 
 _Building the keylogger was fairly straightforward. In researching the keylogger build, I focused on [keyboard input](http://stackoverflow.com/questions/3662368/dev-input-keyboard-format), and [daemons](http://www.netzmafia.de/skripten/unix/linux-daemon-howto.html)_  
 _† This feature is untested._
+
 
 <a name="irc"/>
 **IRC Bot:**  
