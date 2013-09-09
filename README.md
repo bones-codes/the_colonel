@@ -27,7 +27,7 @@ The [rootkit hides](../master/lkm/rootkit.c#L52-L65) itself by deleting its plac
 
 The process ids (PIDs) are stored within an array that is referenced by new_proc_readdir whenever a process related command is sent. If the PID is found within the array, it is not returned. This method of hiding leaves process related commands intact, i.e. `ls`, `ps`, `lsof`, `netstat`, `kill`. Both the custom /proc entry and files are hidden by name and prefix.  
 
-During [rootkit removal](../master/lkm/rootkit.c#L292-L295), all modified functions are restored, the custom /proc entry is deleted, and any hidden PIDs and files are revealed.
+Uninstalling the Colonel restores all modified functions, deletes the custom /proc entry, and reveals any hidden PIDs and files.
 
 _In researching the rootkit build, I focused my efforts on [module programming](http://www.tldp.org/LDP/lkmpg/2.6/html/), and other linux rootkits – specifically Ormi's tutorial on [Writing a Simple Linux Rootkit](http://w3.cs.jmu.edu/kirkpams/550-f12/papers/linux_rootkit.pdf). Since my modifications are fairly lightweight, and the implementation fairly straightforward, most of my personal involvement was in commenting to ensure that I understood what was occurring._
 
@@ -35,21 +35,25 @@ _In researching the rootkit build, I focused my efforts on [module programming](
 **Keylogger:**  
 The keylogger is a user space C daemon. 
 
-Once installed, the keylogger becomes a daemon, hides its PID, creates the required directory and logs, [dynamically finds the keyboard /dev/input/event file](../master/lkm/col_kl.c#L117-L140) †, and begins listening to the custom /proc entry that was created by the rootkit. When the appropriate command is passed to the custom /proc entry, keylogging is activated. Keycodes and their values are captured from the keyboard /dev/input/event file and written to /opt/__col_log/evlog.txt (keylog). The keylogger also logs its activity, as well as any errors, to /opt/__col_log/log.txt.
-Since the created directory is prefixed appropriately, it is hidden by the rootkit.
+Once installed, the keylogger creates the required directory and logs, [dynamically finds the keyboard /dev/input/event file](../master/lkm/col_kl.c#L117-L140) †, and begins listening to the custom /proc entry that was created by the rootkit. When the appropriate command is passed to the custom /proc entry, keylogging is activated. Keycodes and their values are captured from the keyboard /dev/input/event file and written to /opt/__col_log/evlog.txt (keylog). The keylogger also logs its activity, as well as any errors, to /opt/__col_log/log.txt.
+Since the created directory is prefixed appropriately, it is hidden by the rootkit. The rootkit also automatically hides the keylogger PID.
 
 Keylog translation is currently handled by the Python [translation module](../master/irc/key.py) accessed remotely via the IRC bot or locally through the rtcmd command-line program. The translation is done using custom keymaps built using the linux/input.h file.
 
-_Building the keylogger was fairly straightforward. In researching the keylogger build, I focused on [keyboard input](http://stackoverflow.com/questions/3662368/dev-input-keyboard-format) and keycode translation._  
+On removal of the Colonel, the custom logs and directory are deleted.
+
+_Building the keylogger was fairly straightforward. In researching the keylogger build, I focused on [keyboard input](http://stackoverflow.com/questions/3662368/dev-input-keyboard-format), and [daemons](http://www.netzmafia.de/skripten/unix/linux-daemon-howto.html)_  
 _† This feature is untested._
 
 <a name="irc"/>
 **IRC Bot:**  
-The IRC bot is a daemon based on the python IRC framework. Commands can be passed through channel traffic, private messages, and DCC sessions. Bot PID is automatically hidden upon installation.  
+The IRC bot is a user space Python daemon based on the [Python IRC framework](https://pypi.python.org/pypi/irc). 
 
-Commands that are not bot-specific are written to the custom rootkit /proc entry. [Keylog translation](,,/master/irc/col_bot#L109-L116) is handled through the translate function in [irc/key.py](../master/irc/key.py#L57-L109).
+Once installed, the bot connects to the specified channel and begins listening for commands. The bot PID is automatically hidden by the rootkit upon installation. Commands can be passed through channel traffic, private messages, and DCC sessions. Accepted commands are outlined in [Usage](#usage).  
 
-_IRC bot [PID](../master/irc/col_bot#L256-L262) is hidden on installation._
+Commands that are not bot-specific are written to the custom rootkit /proc entry. Once the command is processed, the updated rootkit status is displayed.
+
+The IRC bot is killed on the removal of the Colonel. It can also be killed by passing the `die` command via IRC.  
 
 
 <a name="installation"/>
