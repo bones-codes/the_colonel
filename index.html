@@ -1,0 +1,159 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>The Colonel by cara-bones</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>The Colonel</h1>
+        <p></p>
+
+        <p class="view"><a href="https://github.com/cara-bones/colonel">View the Project on GitHub <small>cara-bones/colonel</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/cara-bones/colonel/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/cara-bones/colonel/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/cara-bones/colonel">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h2>
+<a name="overview" class="anchor" href="#overview"><span class="octicon octicon-link"></span></a>Overview</h2>
+
+<p><a href="showterm.io/13720f013d95a0ceeb05f#fast">Demo</a> | <a href="#documentation">Documentation</a> | <a href="#installation">Installation</a> | <a href="#usage">Usage</a> | <a href="#resources">Resources</a>  </p>
+
+<p>Colonel is an experimental linux kernel module (rootkit) and keylogger. Remote communication is handled through the included IRC bot. The Colonel is able to:  </p>
+
+<ul>
+<li>log keyboard input</li>
+<li>grant root privileges</li>
+<li>hide files</li>
+<li>hide processes</li>
+</ul><p><a name="documentation"></a></p>
+
+<h2>
+<a name="documentation" class="anchor" href="#documentation"><span class="octicon octicon-link"></span></a>Documentation</h2>
+
+<p><a href="#rootkit">Rootkit</a> | <a href="#keylogger">Keylogger</a> | <a href="#irc">IRC Bot</a>  </p>
+
+<p>The following is an overview of the three main components of the Colonel.</p>
+
+<p><strong>TODO:</strong> Add diagram.</p>
+
+<p><a name="rootkit"></a>
+<strong>Rootkit:</strong><br>
+The rootkit is an experimental linux kernel module written in C. </p>
+
+<p>Upon <a href="#installation">installation</a>, the rootkit, along with any properly prefixed files, is hidden. 
+A custom /proc entry is also created and subsequently hidden. Communication with the rootkit is accomplished by passing commands to the custom /proc entry. The custom /proc entry also displays accepted methods of passing commands, rootkit commands, and current rootkit status. You will also find accepted methods of passing commands outlined in <a href="#usage">Usage</a>.  </p>
+
+<p>The <a href="../master/lkm/rootkit.c#L52-L65">rootkit hides</a> itself by deleting its placement within the kobject, and modules listing. Prior to deletion, the rootkit stores its placement. This enables the rootkit to 'show' itself on command by reinserting its entry into the listings. The hiding of the custom /proc entry, processes, and files is accomplished by the <a href="../master/lkm/rootkit.c#L82-L96">modification of page memory attributes</a> and passing in customized functions that target the <a href="../master/lkm/rootkit.c#L100-L119">/proc</a> and <a href="../master/lkm/rootkit.c#L121-L132">file system</a> directory listings.  </p>
+
+<p>The process ids (PIDs) are stored within an array that is referenced by new_proc_readdir whenever a process related command is sent. If the PID is found within the array, it is not returned. This method of hiding leaves process related commands intact, i.e. <code>ls</code>, <code>ps</code>, <code>lsof</code>, <code>netstat</code>, <code>kill</code>. Both the custom /proc entry and files are hidden by name and prefix.  </p>
+
+<p>Uninstalling the Colonel restores all modified functions, deletes the custom /proc entry, and reveals any hidden PIDs and files.</p>
+
+<blockquote>
+<p><em>In researching the rootkit build, I focused my efforts on <a href="http://www.tldp.org/LDP/lkmpg/2.6/html/">module programming</a>, and other linux rootkits – specifically Ormi's tutorial on <a href="http://w3.cs.jmu.edu/kirkpams/550-f12/papers/linux_rootkit.pdf">Writing a Simple Linux Rootkit</a>. Since my modifications are fairly lightweight, and the implementation fairly straightforward, most of my personal involvement was in commenting to ensure that I understood what was occurring.</em></p>
+</blockquote>
+
+<p><a name="keylogger"></a>
+<strong>Keylogger:</strong><br>
+The keylogger is a user space C daemon. </p>
+
+<p>Once installed, the keylogger creates the required directory and logs, <a href="../master/lkm/col_kl.c#L117-L140">dynamically finds the keyboard /dev/input/event file</a> †, and begins listening to the custom /proc entry that was created by the rootkit. When the appropriate command is passed to the custom /proc entry, keylogging is activated. Keycodes and their values are captured from the keyboard /dev/input/event file and written to /opt/__col_log/evlog.txt (keylog). The keylogger also logs its activity, as well as any errors, to /opt/__col_log/log.txt.
+Since the created directory is prefixed appropriately, it is hidden by the rootkit. The rootkit also automatically hides the keylogger PID.</p>
+
+<p>Keylog translation is currently handled by the Python <a href="../master/irc/key.py">translation module</a> accessed remotely via the IRC bot or locally through the rtcmd command-line program. The translation is done using custom keymaps built using the linux/input.h file.</p>
+
+<p>On removal of the Colonel, the custom logs and directory are deleted.</p>
+
+<p><em>† This feature is untested.</em></p>
+
+<blockquote>
+<p><em>Building the keylogger was fairly straightforward. In researching the keylogger build, I focused on <a href="http://stackoverflow.com/questions/3662368/dev-input-keyboard-format">keyboard input</a>, and <a href="http://www.netzmafia.de/skripten/unix/linux-daemon-howto.html">daemons</a>.</em>  </p>
+</blockquote>
+
+<p><a name="irc"></a>
+<strong>IRC Bot:</strong><br>
+The IRC bot is a user space Python daemon based on the Python IRC framework. </p>
+
+<p>Once installed, the bot connects to the specified channel and begins listening for commands. The bot PID is automatically hidden by the rootkit upon installation. Commands can be passed through channel traffic, private messages, and DCC sessions. Accepted commands are outlined in <a href="#usage">Usage</a>.  </p>
+
+<p>Commands that are not bot-specific are written to the custom rootkit /proc entry. Once the command is processed, the updated rootkit status is displayed.</p>
+
+<p>The IRC bot is killed on the removal of the Colonel. It can also be killed by passing the <code>die</code> command via IRC.  </p>
+
+<blockquote>
+<p><em>Since I used the <a href="https://pypi.python.org/pypi/irc">Python IRC framework</a> to construct the bot, most of my time was spent familiarizing myself with bot specific features of the framework.</em></p>
+</blockquote>
+
+<p><a name="installation"></a></p>
+
+<h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>Installation and removal are accomplished via shell scripts. The Colonel should only be run in a virtual machine. Keylogging is not available on Vagrant.<br><em>Note: server, channel and nickname should be set in <a href="../master/irc/col_bot#L36-L39">irc/col_bot</a> prior to installation.</em></p>
+
+<ol>
+<li><code>git clone https://github.com/cara-bones/colonel.git</code></li>
+<li><code>cd /colonel</code></li>
+<li>Create a python virtual environment and activate it.</li>
+<li><code>pip install requirements</code></li>
+<li>Run the <code>./install</code> command.<br>
+</li>
+<li>To remove, run <code>./uninstall</code> from /colonel.</li>
+</ol><p><strong>Requirements:</strong></p>
+
+<ul>
+<li>Linux 'vanilla' Kernel &gt;= 2.6.29 <em>– tested up to 3.2</em>
+</li>
+</ul><p><a name="usage"></a></p>
+
+<h2>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<p><strong>Local:</strong></p>
+
+<p>To pass commands use the included program: <code>./rtcmd &lt;command&gt;</code> or echo: <code>echo -n &lt;command&gt; &gt;&gt; /proc/colonel</code><br>
+To see available commands: <code>./rtcmd help</code> or <code>cat /proc/colonel</code>  </p>
+
+<p><em>Note: Custom /proc file will not be visible on content listing of /proc.</em></p>
+
+<p><strong>Remote:</strong></p>
+
+<p>If in channel, preface all commands with bot nickname and <code>:</code>, i.e. <code>bot-nickname: &lt;command&gt;</code>.<br>
+In private messages or DCC sessions, commands should be passed without prefix.<br>
+Use <code>help</code> to see the  available bot and root commands: <code>bot-nickname: help</code></p>
+
+<p><a name="resources"></a></p>
+
+<h2>
+<a name="resources" class="anchor" href="#resources"><span class="octicon octicon-link"></span></a>Resources</h2>
+
+<ul>
+<li><a href="http://www.tldp.org/LDP/lkmpg/2.6/html/">The Linux Kernel Module Programming Guide</a></li>
+<li><a href="http://www.netzmafia.de/skripten/unix/linux-daemon-howto.html">Linux Daemon Writing HOWTO</a></li>
+<li><a href="https://pypi.python.org/pypi/irc">irc 8.5.1</a></li>
+</ul>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/cara-bones">cara-bones</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
