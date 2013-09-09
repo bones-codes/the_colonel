@@ -43,19 +43,21 @@ Keylog translation is currently handled by the Python [translation module](../ma
 
 On removal of the Colonel, the custom logs and directory are deleted.
 
-_Building the keylogger was fairly straightforward. In researching the keylogger build, I focused on [keyboard input](http://stackoverflow.com/questions/3662368/dev-input-keyboard-format), and [daemons](http://www.netzmafia.de/skripten/unix/linux-daemon-howto.html)_  
+_Building the keylogger was fairly straightforward. In researching the keylogger build, I focused on [keyboard input](http://stackoverflow.com/questions/3662368/dev-input-keyboard-format), and [daemons](http://www.netzmafia.de/skripten/unix/linux-daemon-howto.html)._  
 _† This feature is untested._
 
 
 <a name="irc"/>
 **IRC Bot:**  
-The IRC bot is a user space Python daemon based on the [Python IRC framework](https://pypi.python.org/pypi/irc). 
+The IRC bot is a user space Python daemon based on the Python IRC framework. 
 
 Once installed, the bot connects to the specified channel and begins listening for commands. The bot PID is automatically hidden by the rootkit upon installation. Commands can be passed through channel traffic, private messages, and DCC sessions. Accepted commands are outlined in [Usage](#usage).  
 
 Commands that are not bot-specific are written to the custom rootkit /proc entry. Once the command is processed, the updated rootkit status is displayed.
 
 The IRC bot is killed on the removal of the Colonel. It can also be killed by passing the `die` command via IRC.  
+
+_Since I used the [Python IRC framework](https://pypi.python.org/pypi/irc) to construct the bot, most of my time was spent familiarizing myself with bot specific features of the framework._
 
 
 <a name="installation"/>
@@ -64,7 +66,10 @@ Installation and removal are accomplished via shell scripts. The Colonel should 
 _Note: server, channel and nickname should be set in [irc/col_bot](../master/irc/col_bot#L36-L39) prior to installation._
 
 1. `git clone https://github.com/cara-bones/colonel.git`
-2. From /colonel run the `./install` command.  
+2. `cd /colonel`
+3. Create a python virtual environment and activate it.
+3. `pip install requirements`
+4. Run the `./install` command.  
 3. To remove, run `./uninstall` from /colonel.
 
 **Requirements:**
