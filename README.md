@@ -76,7 +76,8 @@ _Note: server, channel and nickname should be set in [irc/col_bot](../master/irc
 
 To pass commands use the included program: `./rtcmd <command>` or echo: `echo -n <command> >> /proc/colonel`  
 To see available commands: `./rtcmd help` or `cat /proc/colonel`  
-_Custom /proc file will not be visible on content listing of /proc._
+
+_Note: Custom /proc file will not be visible on content listing of /proc._
 
 
 **Remote:**
