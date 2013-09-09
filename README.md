@@ -29,7 +29,9 @@ The process ids (PIDs) are stored within an array that is referenced by new_proc
 
 Uninstalling the Colonel restores all modified functions, deletes the custom /proc entry, and reveals any hidden PIDs and files.
 
-> _In researching the rootkit build, I focused my efforts on [module programming](http://www.tldp.org/LDP/lkmpg/2.6/html/), and other linux rootkits – specifically Ormi's tutorial on [Writing a Simple Linux Rootkit](http://w3.cs.jmu.edu/kirkpams/550-f12/papers/linux_rootkit.pdf). Since my modifications are fairly lightweight, and the implementation fairly straightforward, most of my personal involvement was in commenting to ensure that I understood what was occurring._
+> _In researching the rootkit build, I focused my efforts on [module programming](http://www.tldp.org/LDP/lkmpg/2.6/html/), and other linux rootkits – specifically Ormi's tutorial on [Writing a Simple Linux Rootkit](http://w3.cs.jmu.edu/kirkpams/550-f12/papers/linux_rootkit.pdf)._  
+>
+> _Since my modifications are fairly lightweight, and the implementation fairly straightforward, most of my personal involvement was in commenting to ensure that I understood what was occurring._
   
   
 
