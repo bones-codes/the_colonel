@@ -9,7 +9,7 @@ Colonel is an experimental linux kernel module (rootkit) and keylogger. Remote c
 
 
 <a name="documentation"/>
-## Documentation (draft - editing needed)
+## Documentation
 [Rootkit](#rootkit) | [Keylogger](#keylogger) | [IRC Bot](#irc)  
 
 The following is an overview of the three main components of the Colonel.
