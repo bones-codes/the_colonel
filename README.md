@@ -38,10 +38,9 @@ The keylogger is a user space C daemon.
 Once installed, the keylogger becomes a daemon, hides its PID, creates the required directory and logs, [dynamically finds the keyboard /dev/input/event file](../master/lkm/col_kl.c#L117-L140) †, and begins listening to the custom /proc entry that was created by the rootkit. When the appropriate command is passed to the custom /proc entry, keylogging is activated. Keycodes and their values are captured from the keyboard /dev/input/event file and written to /opt/__col_log/evlog.txt (keylog). The keylogger also logs its activity, as well as any errors, to /opt/__col_log/log.txt.
 Since the created directory is prefixed appropriately, it is hidden by the rootkit.
 
-Keylog translation is handled by the Python translation module accessed remotely via the IRC bot or locally through the [rtcmd](../master/rtcmd) command-line program.
+Keylog translation is currently handled by the Python [translation module](../master/irc/key.py) accessed remotely via the IRC bot or locally through the rtcmd command-line program. The translation is done using custom keymaps built using the linux/input.h file.
 
-_In researching the keylogger_
-
+_Building the keylogger was fairly straightforward. In researching the keylogger build, I focused on [keyboard input](http://stackoverflow.com/questions/3662368/dev-input-keyboard-format) and keycode translation._  
 _† This feature is untested._
 
 <a name="irc"/>
