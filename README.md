@@ -23,7 +23,7 @@ The rootkit is an experimental linux kernel module written in C.
 Upon [installation](#installation), the rootkit, along with any properly prefixed files, is hidden. 
 A custom /proc entry is also created and subsequently hidden. Communication with the rootkit is accomplished by passing commands to the custom /proc entry. The custom /proc entry also displays accepted methods of passing commands, rootkit commands, and current rootkit status. You will also find accepted methods of passing commands outlined in [Usage](#usage).  
 
-The [rootkit hides](../master/lkm/rootkit.c#L52-L65) itself by deleting its placement within the kobject, and modules listing. Prior to deletion, the rootkit stores its placement. This enables the rootkit to 'show' itself on command by reinserting its entry into the listings. The hiding of the custom /proc entry, processes, and files is accomplished by the [modification of page memory attributes](../master/lkm/rootkit.c#L82-L96) and passing in customized functions that target the [/proc](../master/lkm/rootkit.c#L100-L119) and [file system](../master/lkm/rootkit.c#L121-L132) directory listings.  
+The [rootkit hides](../master/lkm/rootkit.c#L52-L65) itself by deleting its placement within the kobject, and kernel modules listings. Prior to deletion, the rootkit stores its placement within each list. This enables the rootkit to 'show' itself on command by reinserting its entry into the listings. The hiding of the custom /proc entry, processes, and files is accomplished by the [modification of page memory attributes](../master/lkm/rootkit.c#L82-L96) and passing in customized functions that target the [/proc](../master/lkm/rootkit.c#L100-L119) and [file system](../master/lkm/rootkit.c#L121-L132) directory listings.  
 
 The process ids (PIDs) are stored within an array that is referenced by new_proc_readdir whenever a process related command is sent. If the PID is found within the array, it is not returned. This method of hiding leaves process related commands intact, i.e. `ls`, `ps`, `lsof`, `netstat`, `kill`. Both the custom /proc entry and files are hidden by name and prefix.  
 
@@ -43,7 +43,7 @@ Once installed, the keylogger creates the required directory and logs, [dynamica
 
 Since the created directory is prefixed appropriately, it is hidden by the rootkit. Keycodes and their values are captured from the keyboard /dev/input/event file and written to /opt/__col_log/evlog.txt (keylog). The keylogger also logs its activity, as well as any errors, to /opt/__col_log/log.txt. The rootkit also automatically hides the keylogger PID.
 
-Keylog translation is currently handled by the Python [translation module](../master/irc/key.py) accessed remotely via the IRC bot or locally through the rtcmd command-line program. The translation is done using custom keymaps built using the linux/input.h file.
+Keylog translation is currently handled by the custom Python [translation module](../master/irc/key.py) accessed remotely via the IRC bot or locally through the rtcmd command-line program. The translation is done using custom keymaps built using the linux/input.h file.
 
 On removal of the Colonel, the custom logs and directory are deleted.
 
@@ -68,8 +68,8 @@ The IRC bot is killed on the removal of the Colonel. It can also be killed by pa
 
 <a name="installation"/>
 ## Installation
-Installation and removal are accomplished via shell scripts. The Colonel should only be run in a virtual machine. Keylogging is not available on Vagrant.   
-_Note: server, channel and nickname should be set in [irc/col_bot](../master/irc/col_bot#L36-L39) prior to installation._
+Installation and removal are accomplished via shell scripts. The Colonel should only be run in a virtual machine.   
+_Note: server, channel and nickname should be set in [irc/col_bot](../master/irc/col_bot#L36-L39) prior to installation. Keylogging is not available on Vagrant._
 
 1. `git clone https://github.com/cara-bones/colonel.git`
 2. `cd /colonel`
