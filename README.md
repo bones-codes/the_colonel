@@ -1,11 +1,43 @@
 ## The Colonel
-[Demo](showterm.io/13720f013d95a0ceeb05f#fast) | [Documentation](#documentation) | [Installation](#installation) | [Usage](#usage) | [Resources](#resources)  
+[Demo](showterm.io/13720f013d95a0ceeb05f#fast) | [Installation](#installation) | [Usage](#usage) | [Documentation](#documentation) | [Resources](#resources)  
 
 Colonel is an experimental linux kernel module (rootkit) and keylogger. Remote communication is handled through the included IRC bot. The Colonel is able to:  
 * log keyboard input
 * grant root privileges
 * hide files
 * hide processes
+
+
+<a name="installation"/>
+## Installation
+Installation and removal are accomplished via shell scripts. The Colonel should only be run in a virtual machine.   
+_Note: server, channel and nickname should be set in [irc/col_bot](../master/irc/col_bot#L36-L39) prior to installation. Keylogging is not available on Vagrant._
+
+1. `git clone https://github.com/cara-bones/colonel.git`
+2. `cd /colonel`
+3. Create a python virtual environment and activate it.
+3. `pip install requirements`
+4. Run the `./install` command.  
+3. To remove, run `./uninstall` from /colonel.
+
+**Requirements:**
+* Linux 'vanilla' Kernel >= 2.6.29 _– tested up to 3.2_
+
+<a name="usage"/>
+## Usage
+#### Local
+
+To pass commands use the included program: `./rtcmd <command>` or echo: `echo -n <command> >> /proc/colonel`  
+To see available commands: `./rtcmd help` or `cat /proc/colonel`  
+
+_Note: Custom /proc file will not be visible on content listing of /proc._
+
+
+#### Remote
+
+If in channel, preface all commands with bot nickname and `:`, i.e. `bot-nickname: <command>`.  
+In private messages or DCC sessions, commands should be passed without prefix.  
+Use `help` to see the  available bot and root commands: `bot-nickname: help`
 
 
 <a name="documentation"/>
@@ -65,37 +97,6 @@ The IRC bot is killed on the removal of the Colonel. It can also be killed by pa
 > _Since I used the [Python IRC framework](https://pypi.python.org/pypi/irc) to construct the bot, most of my time was spent familiarizing myself with bot specific features of the framework._
   
   
-
-<a name="installation"/>
-## Installation
-Installation and removal are accomplished via shell scripts. The Colonel should only be run in a virtual machine.   
-_Note: server, channel and nickname should be set in [irc/col_bot](../master/irc/col_bot#L36-L39) prior to installation. Keylogging is not available on Vagrant._
-
-1. `git clone https://github.com/cara-bones/colonel.git`
-2. `cd /colonel`
-3. Create a python virtual environment and activate it.
-3. `pip install requirements`
-4. Run the `./install` command.  
-3. To remove, run `./uninstall` from /colonel.
-
-**Requirements:**
-* Linux 'vanilla' Kernel >= 2.6.29 _– tested up to 3.2_
-
-<a name="usage"/>
-## Usage
-#### Local
-
-To pass commands use the included program: `./rtcmd <command>` or echo: `echo -n <command> >> /proc/colonel`  
-To see available commands: `./rtcmd help` or `cat /proc/colonel`  
-
-_Note: Custom /proc file will not be visible on content listing of /proc._
-
-
-#### Remote
-
-If in channel, preface all commands with bot nickname and `:`, i.e. `bot-nickname: <command>`.  
-In private messages or DCC sessions, commands should be passed without prefix.  
-Use `help` to see the  available bot and root commands: `bot-nickname: help`
 
 <a name="resources"/>
 ## Resources
