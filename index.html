@@ -3,10 +3,11 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>The Colonel by cara-bones</title>
+    <title>The Colonel by bones-code</title>
 
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -15,22 +16,26 @@
   <body>
     <div class="wrapper">
       <header>
-        <h1>The Colonel</h1>
-        <p></p>
-        <p class="view"><a href="#documentation">Documentation</a> <small>•</small> <a href="#installation">Installation</a> <small>•</small> <a href="#usage">Usage</a><br><span style="display: block; margin-top: -6px;"><small>|</small> <a href="http://showterm.io/13720f013d95a0ceeb05f#fast" target="_blank"><small>demo</small></a> <small>|</small> <a href="#resources"><small>resources</small></a> <small>|</small> <a href="https://github.com/cara-bones/colonel"><small>cara-bones/colonel</small></a> <small>|</small></span>   </p>
-
+        <h1 class="header">The Colonel</h1>
+        <p class="header"></p>
 
         <ul>
-          <li><a href="https://github.com/cara-bones/colonel/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/cara-bones/colonel/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/cara-bones/colonel">View On <strong>GitHub</strong></a></li>
+          <li class="download"><a class="buttons" href="https://github.com/bones-code/the_colonel/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/bones-code/the_colonel/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/bones-code/the_colonel">View On GitHub</a></li>
         </ul>
+
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/bones-code">bones-code</a></p>
+
+
       </header>
       <section>
-        <hr><h2>
-<a name="overview" class="anchor" href="#overview"><span class="octicon octicon-link"></span></a>Overview</h2>
+        <hr>
 
-<p>| <a href="http://showterm.io/13720f013d95a0ceeb05f#fast" target="_blank">View the Demo</a> |</p>
+<h2>
+<a id="overview" class="anchor" href="#overview" aria-hidden="true"><span class="octicon octicon-link"></span></a>Overview</h2>
+
+<p><a href="showterm.io/13720f013d95a0ceeb05f#fast">Demo</a> | <a href="#documentation">Documentation</a> | <a href="#installation">Installation</a> | <a href="#usage">Usage</a> | <a href="#resources">Resources</a>  </p>
 
 <p>Colonel is an experimental linux kernel module (rootkit) and keylogger. Remote communication is handled through the included IRC bot. The Colonel is able to:  </p>
 
@@ -41,19 +46,21 @@
 <li>hide processes</li>
 </ul>
 
-<hr><p><a name="documentation"></a></p>
+<hr>
+
+<p><a name="documentation"></a></p>
 
 <h2>
-<a name="documentation" class="anchor" href="#documentation"><span class="octicon octicon-link"></span></a>Documentation</h2>
+<a id="documentation" class="anchor" href="#documentation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Documentation</h2>
 
-<p>|  <a href="#rootkit">Rootkit</a>  |  <a href="#keylogger">Keylogger</a>  |  <a href="#irc">IRC Bot</a>  |  <a href="http://showterm.io/13720f013d95a0ceeb05f#fast" target="_blank">View the Demo</a>  |</p>
+<p><a href="#rootkit">Rootkit</a> | <a href="#keylogger">Keylogger</a> | <a href="#irc">IRC Bot</a>  </p>
 
 <p>The following is an overview of the three main components of the Colonel.</p>
 
 <p><a name="rootkit"></a></p>
 
 <h3>
-<a name="rootkit" class="anchor" href="#rootkit"><span class="octicon octicon-link"></span></a>Rootkit</h3>
+<a id="rootkit" class="anchor" href="#rootkit" aria-hidden="true"><span class="octicon octicon-link"></span></a>Rootkit</h3>
 
 <p>The rootkit is an experimental linux kernel module written in C. </p>
 
@@ -75,12 +82,12 @@ A custom /proc entry is also created and subsequently hidden. Communication with
 <p><a name="keylogger"></a></p>
 
 <h3>
-<a name="keylogger" class="anchor" href="#keylogger"><span class="octicon octicon-link"></span></a>Keylogger</h3>
+<a id="keylogger" class="anchor" href="#keylogger" aria-hidden="true"><span class="octicon octicon-link"></span></a>Keylogger</h3>
 
 <p>The keylogger is a user space C daemon. </p>
 
-<p>Once installed, the keylogger creates the required directory and logs, <a href="../master/lkm/col_kl.c#L117-L140">dynamically finds the keyboard /dev/input/event file</a> †, and begins listening to the custom /proc entry that was created by the rootkit. When the appropriate command is passed to the custom /proc entry, keylogging is activated.  
-<br><br>Since the created directory is prefixed appropriately, it is hidden by the rootkit. Keycodes and their values are captured from the keyboard /dev/input/event file and written to /opt/__col_log/evlog.txt (keylog). The keylogger also logs its activity, as well as any errors, to /opt/__col_log/log.txt. The rootkit also automatically hides the keylogger PID.</p>
+<p>Once installed, the keylogger creates the required directory and logs, <a href="../master/lkm/col_kl.c#L117-L140">dynamically finds the keyboard /dev/input/event file</a> †, and begins listening to the custom /proc entry that was created by the rootkit. When the appropriate command is passed to the custom /proc entry, keylogging is activated. Keycodes and their values are captured from the keyboard /dev/input/event file and written to /opt/__col_log/evlog.txt (keylog). The keylogger also logs its activity, as well as any errors, to /opt/__col_log/log.txt.
+Since the created directory is prefixed appropriately, it is hidden by the rootkit. The rootkit also automatically hides the keylogger PID.</p>
 
 <p>Keylog translation is currently handled by the Python <a href="../master/irc/key.py">translation module</a> accessed remotely via the IRC bot or locally through the rtcmd command-line program. The translation is done using custom keymaps built using the linux/input.h file.</p>
 
@@ -95,7 +102,7 @@ A custom /proc entry is also created and subsequently hidden. Communication with
 <p><a name="irc"></a></p>
 
 <h3>
-<a name="irc-bot" class="anchor" href="#irc-bot"><span class="octicon octicon-link"></span></a>IRC Bot</h3>
+<a id="irc-bot" class="anchor" href="#irc-bot" aria-hidden="true"><span class="octicon octicon-link"></span></a>IRC Bot</h3>
 
 <p>The IRC bot is a user space Python daemon based on the Python IRC framework. </p>
 
@@ -109,12 +116,15 @@ A custom /proc entry is also created and subsequently hidden. Communication with
 <p><em>Since I used the <a href="https://pypi.python.org/pypi/irc">Python IRC framework</a> to construct the bot, most of my time was spent familiarizing myself with bot specific features of the framework.</em></p>
 </blockquote>
 
-<hr><p><a name="installation"></a></p>
+<hr>
+
+<p><a name="installation"></a></p>
 
 <h2>
-<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
 
-<p>Installation and removal are accomplished via shell scripts. The Colonel should only be run in a virtual machine.<br><em><br>Note – server, channel and nickname should be set in <a href="../master/irc/col_bot#L36-L39">irc/col_bot</a> prior to installation. Keylogging is not available on Vagrant.</em></p>
+<p>Installation and removal are accomplished via shell scripts. The Colonel should only be run in a virtual machine. Keylogging is not available on Vagrant.<br>
+<em>Note: server, channel and nickname should be set in <a href="../master/irc/col_bot#L36-L39">irc/col_bot</a> prior to installation.</em></p>
 
 <ol>
 <li><code>git clone https://github.com/cara-bones/colonel.git</code></li>
@@ -124,33 +134,41 @@ A custom /proc entry is also created and subsequently hidden. Communication with
 <li>Run the <code>./install</code> command.<br>
 </li>
 <li>To remove, run <code>./uninstall</code> from /colonel.</li>
-</ol><p><strong>Requirements:</strong></p>
+</ol>
+
+<p><strong>Requirements:</strong></p>
 
 <ul>
 <li>Linux 'vanilla' Kernel &gt;= 2.6.29 <em>– tested up to 3.2</em>
 </li>
-</ul><hr><p><a name="usage"></a></p>
+</ul>
+
+<hr>
+
+<p><a name="usage"></a></p>
 
 <h2>
-<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h2>
 
-<h4>Local</h4>
+<p><strong>Local:</strong></p>
 
 <p>To pass commands use the included program: <code>./rtcmd &lt;command&gt;</code> or echo: <code>echo -n &lt;command&gt; &gt;&gt; /proc/colonel</code><br>
-<br>To see available commands: <code>./rtcmd help</code> or <code>cat /proc/colonel</code>
-<br>
-<em>Note – Custom /proc file will not be visible on content listing of /proc.</em></p>
+To see available commands: <code>./rtcmd help</code> or <code>cat /proc/colonel</code>  </p>
 
-<h4>Remote</h4>
+<p><em>Note: Custom /proc file will not be visible on content listing of /proc.</em></p>
+
+<p><strong>Remote:</strong></p>
 
 <p>If in channel, preface all commands with bot nickname and <code>:</code>, i.e. <code>bot-nickname: &lt;command&gt;</code>.<br>
-<br>In private messages or DCC sessions, commands should be passed without prefix.<br>
+In private messages or DCC sessions, commands should be passed without prefix.<br>
 Use <code>help</code> to see the  available bot and root commands: <code>bot-nickname: help</code></p>
 
-<hr><p><a name="resources"></a></p>
+<hr>
+
+<p><a name="resources"></a></p>
 
 <h2>
-<a name="resources" class="anchor" href="#resources"><span class="octicon octicon-link"></span></a>Resources</h2>
+<a id="resources" class="anchor" href="#resources" aria-hidden="true"><span class="octicon octicon-link"></span></a>Resources</h2>
 
 <ul>
 <li><a href="http://www.tldp.org/LDP/lkmpg/2.6/html/">The Linux Kernel Module Programming Guide</a></li>
@@ -159,11 +177,10 @@ Use <code>help</code> to see the  available bot and root commands: <code>bot-nic
 </ul>
       </section>
       <footer>
-        <p>This project is maintained by <a href="https://github.com/cara-bones">cara-bones</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+        <p><small>Hosted on <a href="http://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
       </footer>
     </div>
-    <script src="javascripts/scale.fix.js"></script>
-    
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+		
   </body>
 </html>
