@@ -13,7 +13,7 @@ Colonel is an experimental linux kernel module (rootkit) and keylogger. Remote c
 Installation and removal are accomplished via shell scripts. The Colonel should only be run in a virtual machine.   
 _Note: server, channel and nickname should be set in [irc/col_bot](../master/irc/col_bot#L36-L39) prior to installation. Keylogging is not available on Vagrant._
 
-1. `git clone https://github.com/cara-bones/colonel.git`
+1. `git clone https://github.com/bones-code/colonel.git`
 2. `cd /colonel`
 3. Create a python virtual environment and activate it.
 3. `pip install requirements`
